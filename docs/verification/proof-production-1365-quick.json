@@ -1,0 +1,15 @@
+{
+  "url": "https://sahara-chi.vercel.app",
+  "log": [
+    "doctor passed at 1365: correct title and desert started",
+    "1365: scene 0 entry view only",
+    "1365: scene 1 entry view only",
+    "1365: scene 2 entry view only",
+    "1365: scene 3 entry view only",
+    "Navigation-strip pointer swipe changed chapter",
+    "Dialog, keyboard look and opt-in sound states verified",
+    "Reduced-motion emulation: paused default and pixel-identical canvas over 700ms"
+  ],
+  "errors": [],
+  "passed": true
+}
