@@ -4,14 +4,16 @@
   "description": "An original, procedural 360-degree desert world. One imagined dune sea at four hours: first light, the white noon, a ring of green, and a river of stars.",
   "main": "sahara.js",
   "scripts": {
-    "check": "node --check sahara.js && node --check scripts/verify.mjs",
-    "verify": "node scripts/verify.mjs"
+    "check": "node --check sahara.js && node --check scripts/verify.mjs && node --check scripts/scene-gate.mjs",
+    "verify": "node scripts/verify.mjs",
+    "test": "node scripts/scene-gate.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "playwright": "^1.56.1"
+    "playwright": "^1.56.1",
+    "puppeteer-core": "^24.31.0"
   },
   "type": "module"
 }
