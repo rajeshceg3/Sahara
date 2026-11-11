@@ -34,11 +34,17 @@ try{
  const cdp=await q.createCDPSession();
  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:hc.x,y:hc.y}]});
  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
- await new Promise(r=>setTimeout(r,250));
- // focus the pin at once: focus-within holds the woken chrome, so a slow
- // software-rendered CI frame cannot race the 2.6s retire.
- await q.evaluate(()=>document.querySelector('#pin').focus());
- const st=await q.evaluate(()=>({ae:document.activeElement&&document.activeElement.id,vis:getComputedStyle(document.querySelector('header')).visibility,pr:document.querySelector('#pin').getAttribute('aria-pressed')}));
+ // Focus the pin in the same breath as the tap: focus-within then holds the
+ // woken chrome, so slow software-rendered CI frames cannot race the 2.6s
+ // retire. One round-trip, no sleeps, with one tap-and-focus retry.
+ let st;
+ for(let tries=0;tries<2;tries++){
+   st=await q.evaluate(()=>{document.querySelector('#pin').focus();return {ae:document.activeElement&&document.activeElement.id,vis:getComputedStyle(document.querySelector('header')).visibility,pr:document.querySelector('#pin').getAttribute('aria-pressed')}});
+   if(st.ae==='pin'&&st.vis==='visible')break;
+   const hc2=await q.$eval('#chrome-hint',e=>{const r=e.getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2}});
+   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:hc2.x,y:hc2.y}]});
+   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ }
  assert.equal(st.vis,'visible','hint woke the controls');
  assert.equal(st.ae,'pin','pin focused');
  assert.equal(st.pr,'false');

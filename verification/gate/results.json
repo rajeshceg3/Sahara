@@ -2,26 +2,6 @@
   {
     "width": 320,
     "motion": "reduce",
-    "ch": 0,
-    "resetHeld": true,
-    "audioOff": true,
-    "targets": true,
-    "labels": true,
-    "encounter": true
-  },
-  {
-    "width": 320,
-    "motion": "reduce",
-    "ch": 1,
-    "resetHeld": true,
-    "audioOff": true,
-    "targets": true,
-    "labels": true,
-    "encounter": true
-  },
-  {
-    "width": 320,
-    "motion": "reduce",
     "ch": 2,
     "resetHeld": true,
     "audioOff": true,
