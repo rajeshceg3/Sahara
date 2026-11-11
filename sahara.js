@@ -158,11 +158,11 @@ const legG=new T.Group();legG.position.set(hipX,hipY,z);
 const upLen=hipY-(front?.82:.80);
 const up=mergeParts([
 {geo:new T.CylinderGeometry(front?.105:.13,front?.082:.10,upLen,8),m:M4(0,-upLen/2,0),c:function(q,c){c.set(front?C_FLANK:C_BACK).lerp(new T.Color(C_BELLY),.3);}},
-front?{geo:new T.SphereGeometry(1,7,6),m:M4(0,-.16,0,.11,.18,.10),c:C_FLANK}:{geo:new T.SphereGeometry(1,8,6),m:M4(-.02,-.16,0,.17,.28,.135),c:C_BACK}]);
+front?{geo:new T.SphereGeometry(1,8,7),m:M4(0,-.10,0,.14,.26,.12),c:C_FLANK}:{geo:new T.SphereGeometry(1,9,7),m:M4(-.03,-.12,0,.20,.32,.16),c:C_BACK}]);
 const upMesh=new T.Mesh(up,camelMatGlobal);upMesh.castShadow=true;legG.add(upMesh);
 const kneeG=new T.Group();kneeG.position.set(front?.02:-.05,-upLen,0);
 const low=mergeParts([
-{geo:new T.SphereGeometry(front?.085:.10,8,6),m:M4(0,0,0),c:'#8a5f3a'},
+{geo:new T.SphereGeometry(front?.075:.088,8,6),m:M4(0,0,0),c:'#8a5f3a'},
 {geo:new T.CylinderGeometry(.070,.056,.60,7),m:M4(front?.02:.02,-.31,0),c:C_LEG},
 {geo:new T.SphereGeometry(1,8,6),m:M4(front?.06:.04,-.615,0,.145,.055,.115),c:C_LEG},
 {geo:new T.SphereGeometry(1,6,5),m:M4(front?.13:.11,-.63,.034,.05,.034,.034),c:'#a8855c'},
@@ -177,15 +177,15 @@ const tailGeo=mergeParts([
 const tailMesh=new T.Mesh(tailGeo,camelMatGlobal);tailMesh.castShadow=true;tailG.add(tailMesh);g.add(tailG);
 // Woven blanket with tassel hem, girth rope and saddle roll.
 const bcol=new T.Color(blanket);
-const shell=new T.CylinderGeometry(.85,.92,1.10,14,1,true,-Math.PI*.46,Math.PI*.92);shell.rotateZ(Math.PI/2);
-const blanketParts=[{geo:paint(shell,(q,c)=>{c.copy(bcol);if(Math.abs(q.z)>.42||Math.abs(q.x+.1)>.42)c.multiplyScalar(.55);}),m:M4(-.14,1.80,0,1,.88,1.04),c:null},
-{geo:new T.TorusGeometry(.66,.016,5,20),m:M4(-.14,1.62,0,1,1.05,1,0,0,0),c:'#4a3018'},
-{geo:new T.CylinderGeometry(.065,.065,.5,7),m:M4(-.14,2.22,0,1,1,1,Math.PI/2,0,0),c:new T.Color(blanket).multiplyScalar(.7).getStyle()}];
-for(let k=0;k<9;k++){const bx=-.14-.46+k*.115;for(const s of[-1,1])blanketParts.push({geo:new T.ConeGeometry(.02,.075,4),m:M4(bx,1.06,s*.65,1,1,1,Math.PI),c:'#d9c49a'});}
+const shell=new T.CylinderGeometry(.72,.88,.78,14,1,true,-Math.PI*.30,Math.PI*.60);shell.rotateZ(Math.PI/2);
+const blanketParts=[{geo:paint(shell,(q,c)=>{c.copy(bcol);if(Math.abs(q.z)>.30)c.multiplyScalar(.6);const stripe=Math.floor((q.x+.5)*9);if(stripe%3===0)c.multiplyScalar(.82);if(stripe%3===1)c.lerp(new T.Color('#e8d9b0'),.18);}),m:M4(-.10,2.02,0,1,.62,1.02),c:null},
+{geo:new T.TorusGeometry(.60,.016,5,20),m:M4(-.10,1.78,0,1,1.05,1,0,0,0),c:'#4a3018'},
+{geo:new T.CylinderGeometry(.06,.06,.44,7),m:M4(-.10,2.28,0,1,1,1,Math.PI/2,0,0),c:new T.Color(blanket).multiplyScalar(.7).getStyle()}];
+for(let k=0;k<7;k++){const bx=-.10-.33+k*.11;for(const s of[-1,1])blanketParts.push({geo:new T.ConeGeometry(.02,.075,4),m:M4(bx,1.32,s*.60,1,1,1,Math.PI),c:'#d9c49a'});}
 const blanketMesh=new T.Mesh(mergeParts(blanketParts),new T.MeshStandardMaterial({vertexColors:true,roughness:.85,side:T.DoubleSide}));blanketMesh.castShadow=true;g.add(blanketMesh);
 g.scale.setScalar(.9);g.userData.kind='caravan';g.userData.legs=legs;g.userData.head=headG;g.userData.tail=tailG;return g;}
 const camelMatGlobal=creatureMat(.9,furTex('#7a5636',.16,1500));
-const camels=[];const blankets=['#a8442f','#2f5a8a','#b8862f','#6a3a8a'];
+const camels=[];const blankets=['#8a4a38','#3a5a72','#96742f','#5c4470'];
 for(let i=0;i<4;i++){const c=makeCamel(blankets[i]);c.scale.multiplyScalar(range(1.0,1.15));scene.add(c);camels.push(c);animals.push(c);}
 const caraC=v(14,0,-20),caraR=14;
 // Lead ropes between consecutive camels, recomputed each frame with a natural sag.
