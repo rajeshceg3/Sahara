@@ -34,3 +34,24 @@ grain, not strand fur; at extreme close range geometry reads smooth-stylised
 rather than photographic; dove primaries are individual geometry but do not
 flex like real feathers. Subjective "alive" judgement rests on the captured
 frames, not a claim of indistinguishability.
+
+## Round 2 (2026-11-11, PR #4, production 72084c2)
+
+Dove wings rebuilt as shaped, overlapping feather geometries (coverts,
+secondaries, seven primaries) - the stacked-plate look is gone; perched doves
+gained folded wings, a lifted head on a real neck, and a fanned feather tail.
+Fennec haunch tucked into a seated line, ears narrowed with a subtle warm
+inner-ear glow (subsurface suggestion), sparse alpha-strand fur shell over
+body and tail. Head/body tessellation raised for close-ups. Frame-mode
+cameras moved to profile views; ?frame=dove watches the perched pool-edge bird.
+
+Executed locally (real Chromium, SwiftShader): behavior suite WIDTH=390
+QUICK=1 green; scene-gate full matrix Passed - 320, 390 and 1440 in both
+no-preference and reduce (1440 and some reduce cells run split by chapter to
+fit the runner). Production verified after deploy: sahara.js md5 matches
+main, scene-gate BASE_URL 390 no-preference Passed, close-up frames captured
+from the live site.
+
+Honest below-bar notes: creatures remain stylised 3D - folded-wing feather
+rows read faintly in dawn light, the fur shell is a halo of guard hairs not
+strand fur, and no photographic indistinguishability is claimed.
