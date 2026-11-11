@@ -22,7 +22,7 @@ try{
  await p.focus('nav [aria-current=true]');await p.keyboard.press('ArrowRight');await p.waitForFunction(()=>+document.body.dataset.chapter===2,{timeout:5000});
  await p.click('#about');assert.equal(await p.$eval('dialog',e=>e.open),true);await p.keyboard.press('Escape');assert.equal(await p.$eval('dialog',e=>e.open),false);
  await p.close();
- {const q=await b.newPage();await q.setViewport({width,height:844});await q.emulateMediaFeatures([{name:'prefers-reduced-motion',value:motion}]);await q.evaluateOnNewDocument(()=>{try{localStorage.removeItem('sahara-chrome-pin')}catch(e){}});await q.goto(url);await q.waitForFunction(()=>!document.querySelector('#status'));await q.evaluate(()=>{try{localStorage.removeItem('sahara-chrome-pin')}catch(e){}});
+ {const q=await b.newPage();await q.bringToFront();await q.setViewport({width,height:844});await q.emulateMediaFeatures([{name:'prefers-reduced-motion',value:motion}]);await q.evaluateOnNewDocument(()=>{try{localStorage.removeItem('sahara-chrome-pin')}catch(e){}});await q.goto(url);await q.waitForFunction(()=>!document.querySelector('#status'));await q.evaluate(()=>{try{localStorage.removeItem('sahara-chrome-pin')}catch(e){}});
  await new Promise(r=>setTimeout(r,3400));
  assert.ok(await q.$('#chrome-hint'),'chrome retired and the caravan-star hint is showing');
  assert.equal(await q.$eval('header',e=>getComputedStyle(e).visibility),'hidden','toolbar retired');
@@ -39,7 +39,10 @@ try{
  assert.equal(await q.$eval('#pin',e=>e.getAttribute('aria-pressed')),'false');
  // layout hit-test: the pin cairn really is the topmost target at its centre
  assert.ok(['svg','path','BUTTON'].includes(await q.evaluate(()=>{const b=document.querySelector('#pin');const r=b.getBoundingClientRect();const t=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return t?(t.id||t.tagName):'none'})),'pin is the hit target at its centre');
- await q.focus('#pin');await q.keyboard.press('Enter');await new Promise(r=>setTimeout(r,150));
+ await q.focus('#pin');
+ if(await q.evaluate(()=>document.activeElement&&document.activeElement.id)!=='pin')await q.evaluate(()=>document.querySelector('#pin').focus());
+ assert.equal(await q.evaluate(()=>document.activeElement&&document.activeElement.id),'pin','pin focused');
+ await q.keyboard.press('Enter');await new Promise(r=>setTimeout(r,150));
  assert.equal(await q.$eval('#pin',e=>e.getAttribute('aria-pressed')),'true','pin toggled on');
  await new Promise(r=>setTimeout(r,3200));
  assert.equal(await q.$eval('header',e=>getComputedStyle(e).visibility),'visible','pin holds the controls');
