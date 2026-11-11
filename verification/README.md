@@ -1,9 +1,36 @@
-# Subject-view refinement verification
+# Living creatures verification
 
-This is an imagined dune sea, not a map or travel guide. Existing procedural palms, caravan, sandfish, fennec and dunes are preserved. Entry cameras now place caravan/pool/fennec above the bounded story panel. Reset clears active drag and returns to the chapter angle and position. Night sand and ambient light now shift to moonlit blue. The previous full lower-half veil is removed. Fonts and OFL licenses are local.
+The caravan, sandfish, fennec and oasis doves are rebuilt as anatomically
+referenced procedural creatures: dromedaries with a displaced-sphere barrel and
+hump, S-curved necks, lashed eyes, jointed pacing legs, woven blankets with
+tassel hems and sagging lead ropes; a banded glossy sandfish that swims the
+loose sand with a surface wake and arcs out to breathe; a sitting fennec with
+pink-lined ears that swivel independently, scanning head and blinks; laughing
+doves with speckled forenecks, two-segment feathered wings, flap-glide cycles,
+banked turns and a resident pair feeding at the pool edge. Tapping a creature
+now carries the viewer to a respectful watching distance and follows it.
 
-Executed locally before PR: all four chapters at 390 and 1440 in reduced and normal motion; 320 reduced motion. Real pointer drag then Reset, held entry yaw/pitch, opt-in sound off, 44px targets, 16px detail/navigation floor, no horizontal overflow, encounter/return, navigation swipe changing one chapter, keyboard chapter navigation, dialog Escape and no page errors. Desktop runs are split into two chapters to fit capture runtime. CI runs every chapter at all three widths in both motions.
+A `?frame=<camel|fennec|sandfish|dove>` query places the camera at watching
+distance of a subject for close inspection, and `&clean=1` hides the interface
+chrome. Both exist for verification only and do not change the app otherwise.
 
-Pixel contrast: 104 glyph/backdrop samples across all scenes at 390 and 1440, minimum 9.129:1 at solid glyph cores, against the actual underlying pixels. Additional Reset-hover state samples checked separately. Transient orientation animation and arbitrary camera angles excluded.
+Executed locally before PR (2026-11-11, real Chromium via Playwright/puppeteer,
+SwiftShader WebGL): all four chapters at 390 and 1365 with entry views, real
+pointer drag then Reset holding entry yaw/pitch, encounter open/return per
+chapter, navigation swipe changing one chapter, keyboard chapter navigation,
+dialog Escape, opt-in sound state, no horizontal overflow, 44px targets, 16px
+floor, close-up subject frames for camel, fennec, sandfish and dove at 390,
+reduced-motion emulation paused default with pixel-identical canvas over 700ms,
+no page errors. Scene-gate assertions passed at 320 and 390 in normal motion;
+1440 normal-motion (chapters split) and the full reduced-motion matrix at 320, 390 and 1440 also executed locally and passed.
 
-Ten seconds of actual app audio output captured by teeing its AudioDestination connection, mean -31.1 dB, peak -18.4 dB, no clipping. Subjective listening remains unverified and is tracked separately; do not claim it is audio-quality complete.
+Two latent bugs found and fixed by this gate: the app's chapter scoping
+included `body` in its `[data-chapter]` selection (so `body` received
+`aria-current`), and the behavior suite's own selectors matched `body` for the
+same reason.
+
+Honest below-bar notes: coats are vertex-colour gradients over canvas fur
+grain, not strand fur; at extreme close range geometry reads smooth-stylised
+rather than photographic; dove primaries are individual geometry but do not
+flex like real feathers. Subjective "alive" judgement rests on the captured
+frames, not a claim of indistinguishability.
