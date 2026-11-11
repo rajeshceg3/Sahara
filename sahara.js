@@ -198,14 +198,14 @@ const tailMesh=new T.Mesh(tailGeo,camelMatGlobal);tailMesh.castShadow=true;tailG
 // Woven blanket with tassel hem, girth rope and saddle roll.
 const bcol=new T.Color(blanket);
 const shell=new T.CylinderGeometry(.72,.88,.78,14,1,true,-Math.PI*.30,Math.PI*.60);shell.rotateZ(Math.PI/2);
-const blanketParts=[{geo:paint(shell,(q,c)=>{c.copy(bcol);if(Math.abs(q.z)>.30)c.multiplyScalar(.6);const stripe=Math.floor((q.x+.5)*9);if(stripe%3===0)c.multiplyScalar(.82);if(stripe%3===1)c.lerp(new T.Color('#e8d9b0'),.30);}),m:M4(-.02,1.97,0,1,.55,1.02,0,0,-.06),c:null},
+const blanketParts=[{geo:paint(shell,(q,c)=>{c.copy(bcol);if(Math.abs(q.z)>.30)c.multiplyScalar(.8);const stripe=Math.floor((q.x+.5)*9);if(stripe%3===0)c.multiplyScalar(.82);if(stripe%3===1)c.lerp(new T.Color('#e8d9b0'),.30);}),m:M4(-.02,1.97,0,1,.55,1.02,0,0,-.06),c:null},
 {geo:new T.TorusGeometry(.60,.016,5,20),m:M4(-.10,1.78,0,1,1.05,1,0,0,0),c:'#4a3018'},
 {geo:new T.CylinderGeometry(.06,.06,.44,7),m:M4(-.10,2.28,0,1,1,1,Math.PI/2,0,0),c:new T.Color(blanket).multiplyScalar(.7).getStyle()}];
 for(let k=0;k<7;k++){const bx=-.10-.33+k*.11;for(const s of[-1,1])blanketParts.push({geo:new T.ConeGeometry(.02,.075,4),m:M4(bx,1.32,s*.60,1,1,1,Math.PI),c:'#d9c49a'});}
 const blanketMesh=new T.Mesh(mergeParts(blanketParts),new T.MeshStandardMaterial({vertexColors:true,roughness:.85,side:T.DoubleSide}));blanketMesh.castShadow=true;g.add(blanketMesh);
 g.scale.setScalar(.9);g.userData.kind='caravan';g.userData.legs=legs;g.userData.head=headG;g.userData.tail=tailG;return g;}
 const camelMatGlobal=creatureMat(.9,furTex('#7a5636',.16,1500));
-const camels=[];const blankets=['#96543e','#4a6a80','#a8843a','#6a5478'];
+const camels=[];const blankets=['#96543e','#5f7f95','#a8843a','#7a6488'];
 for(let i=0;i<4;i++){const c=makeCamel(blankets[i]);c.scale.multiplyScalar(range(1.0,1.15));scene.add(c);camels.push(c);animals.push(c);}
 const caraC=v(14,0,-20),caraR=14;
 // Lead ropes between consecutive camels, recomputed each frame with a natural sag.
@@ -313,9 +313,9 @@ d.userData.kind='dove';const a=1.1+i*1.9;d.position.set(oasisC.x+Math.sin(a)*10.
 const V_SAND='#d4b47c',V_BAND='#a8804a',V_BELLY='#ecd9ac';
 const viper=new T.Group();
 const viperCoil=mergeParts([
-{geo:paint(taperTube([v(-.20,.035,.04),v(-.02,.035,.17),v(.17,.035,.10),v(.17,.035,-.08),v(-.02,.035,-.13),v(-.15,.035,-.05)],t=>.058-.016*t,9),(q,c)=>{c.set(V_SAND);const band=Math.floor((Math.atan2(q.z,q.x)+Math.PI)/.55);if(band%2)c.lerp(new T.Color(V_BAND),.52);c.lerp(new T.Color(V_BELLY),T.MathUtils.clamp((.03-q.y)*12,0,.45));}),m:M4(0,0,0),c:null},
+{geo:paint(taperTube([v(-.19,.035,.03),v(-.03,.035,.15),v(.15,.035,.09),v(.14,.035,-.06),v(-.02,.035,-.11),v(-.13,.035,-.04)],t=>.058-.016*t,9),(q,c)=>{c.set(V_SAND);const bl=Math.sin(q.x*31+1.3)*Math.sin(q.z*27-.4)+.35*Math.sin(q.x*57+q.z*49);if(bl>.42)c.lerp(new T.Color(V_BAND),.68);c.lerp(new T.Color(V_BELLY),T.MathUtils.clamp((.03-q.y)*12,0,.45));}),m:M4(0,0,0),c:null},
 {geo:paint(taperTube([v(.14,.045,.08),v(.28,.10,.13),v(.38,.20,.16)],t=>.048-.012*t,9),(q,c)=>c.set(V_SAND).lerp(new T.Color(V_BAND),.12)),m:M4(0,0,0),c:null}]);
-const viperMat=creatureMat(.72,null,{bumpMap:scaleBumpTex(),bumpScale:.45,rim:.16,rimColor:'#ffe8c4'});
+const viperMat=creatureMat(.72,null,{bumpMap:scaleBumpTex(),bumpScale:.45,rim:.04,rimColor:'#ffe8c4'});
 const viperCoilMesh=new T.Mesh(viperCoil,viperMat);viperCoilMesh.castShadow=true;viper.add(viperCoilMesh);
 const viperHead=new T.Group();viperHead.position.set(.38,.20,.16);
 const viperHeadGeo=mergeParts([
@@ -372,13 +372,13 @@ const agamaRock=mesh(new T.SphereGeometry(1,10,7),creatureMat(.95),v(agamaC.x,ag
 const agamaParts=[
 {geo:paint(taperTube([v(.14,.06,0),v(0,.055,0),v(-.14,.05,0)],t=>.052-t*.012,9),(q,c)=>{c.set('#9a8a70');if(Math.sin(q.x*38)*Math.sin(q.y*46+q.z*30)>.35)c.set('#d8b83c');}),m:M4(0,0,0),c:null},
 {geo:paint(taperTube([v(-.14,.05,0),v(-.30,.055,.04),v(-.42,.075,.10)],t=>.030*(1-t*.55),7),(q,c)=>c.set('#8a7a60')),m:M4(0,0,0),c:null},
-{geo:new T.SphereGeometry(1,9,7),m:M4(.185,.065,0,.055,.042,.045),c:function(q,c){c.set('#6a92b4');if(q.y<.06)c.lerp(new T.Color('#8fb2cc'),.6);}},
-{geo:new T.SphereGeometry(.008,6,5),m:M4(.215,.085,.033),c:'#1a0f05'},
-{geo:new T.SphereGeometry(.008,6,5),m:M4(.215,.085,-.033),c:'#1a0f05'}];
+{geo:new T.SphereGeometry(1,9,7),m:M4(.18,.062,0,.045,.036,.038),c:function(q,c){c.set('#7d94a6');if(q.y<.055)c.lerp(new T.Color('#9fb4c2'),.55);}},
+{geo:new T.SphereGeometry(.008,6,5),m:M4(.208,.072,.028),c:'#1a0f05'},
+{geo:new T.SphereGeometry(.008,6,5),m:M4(.208,.072,-.028),c:'#1a0f05'}];
 for(const s of[-1,1])agamaParts.push(
 {geo:new T.CylinderGeometry(.009,.007,.075,5),m:M4(.09,.028,s*.055,1,1,1,s*.55,0,.5),c:'#8a7a60'},
 {geo:new T.CylinderGeometry(.009,.007,.075,5),m:M4(-.08,.028,s*.055,1,1,1,s*.55,0,2.6),c:'#8a7a60'});
-const agamaMesh=new T.Mesh(mergeParts(agamaParts),creatureMat(.85,null,{rim:.2}));agamaMesh.castShadow=true;
+const agamaMesh=new T.Mesh(mergeParts(agamaParts),creatureMat(.85,null,{rim:.08}));agamaMesh.castShadow=true;
 const agama=new T.Group();agama.add(agamaMesh);agama.position.set(agamaC.x,agamaC.y+.09,agamaC.z);agama.rotation.y=2.4;agama.userData.kind='agama';scene.add(agama);animals.push(agama);
 const chapters=[
 {title:'First light.<br><i>Long shadows.</i>',line:"The dunes hold the night's cold a little longer.",action:'Walk with the caravan',pos:v(-3,0,10),yaw:2.40,pitch:-.04,skyTop:'#8fb4d6',skyHor:'#f7c489',fog:.0016,ink:'#4a2f14',veil:['#3a240c30','#2a1a08e0','#22150af7'],sun:v(.92,.14,.22),sunColor:'#ffc08a',sunI:2.4,hemiI:1.5,glowAmt:1.1,kind:'caravan',wind:.5},
