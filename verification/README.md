@@ -74,3 +74,31 @@ legs are verified on open sand, not in a dune dip.
 
 Honest below-bar notes: still stylised 3D; the saddle cloth rim is a hard
 edge at some angles, and dawn backlight flattens feather contrast.
+
+## Round 2c (2026-11-11, new Sahara creatures)
+
+Four new tappable, animated residents: a horned viper coiled in the chapter-1
+dunes (sandy chevron bands, supraocular horns, slow head sway and forked-tongue
+flick), a three-bird chestnut-bellied sandgrouse flock at the pool edge
+(fine dark barring over a plump elongated body, folded pointed wing feathers,
+visible legs and toes), a scarab rolling its ball in a circle near the caravan
+path, and a yellow-spotted agama displaying push-ups on an oasis rock with a
+blue breeding head. Camel neck-head junction gained a blend wad. All kinds are
+in facts{}, the tap list, watchAnimal framing and both frame-capture lists.
+
+Executed locally (real Chromium, SwiftShader): behavior suite WIDTH=390
+QUICK=1 green including reduced-motion pixel-identity; scene-gate full matrix
+Passed - 320, 390 and 1440 in both no-preference and reduce (1440 split by
+chapter; no-preference quiet/pinned tail run as its own cell via the new
+SKIP_QUIET split knob after SwiftShader memory pressure closed long sessions).
+One gate-robustness fix, not an app change: the quiet-tail tap now waits for
+the woken chrome state before focusing the pin; a manual probe at 1440
+no-preference showed the tap waking the chrome (chrome-on at ~300ms, header
+visible at ~800ms), so the app behaviour was always correct - the old
+synchronous read raced slow software-rendered frames. Frame captures iterated
+visually against reference photos for all four new kinds.
+
+Honest below-bar notes: still stylised 3D. The viper's scales are colour bands
+not relief, the sandgrouse barring is procedural striping not feather-by-
+feather patterning, and the scarab and agama are small and simply lit at
+scene distance. No photographic indistinguishability is claimed.

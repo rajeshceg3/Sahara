@@ -27,7 +27,7 @@ try {
     }
   } else {
     // frame mode: close-up per animal via ?frame=kind
-    for (const kind of ['camel', 'fennec', 'sandfish', 'dove']) {
+    for (const kind of ['camel', 'fennec', 'sandfish', 'dove', 'viper', 'sandgrouse', 'scarab', 'agama']) {
       await page.goto(`${url}/?frame=${kind}&clean=1`);
       await page.locator('#status').waitFor({ state: 'detached' });
       const shots = kind === 'camel' ? 5 : 2;

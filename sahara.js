@@ -145,6 +145,7 @@ const bodyMesh=new T.Mesh(body,camelMatGlobal);bodyMesh.castShadow=true;g.add(bo
 const headG=new T.Group();headG.position.set(1.47,2.20,0);
 const headGeo=mergeParts([
 {geo:new T.SphereGeometry(1,20,15),m:M4(.08,0,0,.20,.155,.135),c:headCoat},
+{geo:new T.SphereGeometry(1,12,9),m:M4(-.10,-.09,0,.13,.14,.10),c:C_FLANK},
 {geo:paint(taperTube([v(.14,-.02,0),v(.37,-.05,0),v(.52,-.13,0)],t=>.082-.032*t,8),(q,c)=>{c.set(C_FLANK).lerp(new T.Color(C_MUZZLE),T.MathUtils.clamp((q.x-.30)/.18,0,1));}),m:M4(0,0,0),c:null},
 {geo:new T.SphereGeometry(1,8,6),m:M4(.28,-.125,0,.15,.055,.085),c:C_MUZZLE},
 {geo:new T.SphereGeometry(.014,6,5),m:M4(.50,-.09,.038),c:C_EYE},
@@ -291,6 +292,75 @@ const wl=doveWing(1),wr=doveWing(-1);d.add(wl);d.add(wr);d.userData.kind='dove';
 // A resident pair feeding and drinking at the pool edge.
 const perchedDoves=[];for(let i=0;i<2;i++){const d=new T.Group();const body=new T.Mesh(doveBody(true),doveMat);body.castShadow=true;d.add(body);
 d.userData.kind='dove';const a=1.1+i*1.9;d.position.set(oasisC.x+Math.sin(a)*10.4,0,oasisC.z+Math.cos(a)*10.4);d.position.y=Math.max(dune(d.position.x,d.position.z)+.26,oasisC.y+.5);d.rotation.y=a+Math.PI/2+i*.8;scene.add(d);perchedDoves.push(d);animals.push(d);}
+// --- Round 2c: more Sahara wildlife, each built against reference photos ---
+// Horned viper: ambush coil in the white-hour dunes, horns over the eyes.
+const V_SAND='#d4b47c',V_BAND='#a8804a',V_BELLY='#ecd9ac';
+const viper=new T.Group();
+const viperCoil=mergeParts([
+{geo:paint(taperTube([v(-.20,.035,.04),v(-.02,.035,.17),v(.17,.035,.10),v(.17,.035,-.08),v(-.02,.035,-.13),v(-.15,.035,-.05)],t=>.058-.016*t,9),(q,c)=>{c.set(V_SAND);const band=Math.floor((Math.atan2(q.z,q.x)+Math.PI)/.55);if(band%2)c.lerp(new T.Color(V_BAND),.32);c.lerp(new T.Color(V_BELLY),T.MathUtils.clamp((.03-q.y)*12,0,.7));}),m:M4(0,0,0),c:null},
+{geo:paint(taperTube([v(.14,.045,.08),v(.28,.10,.13),v(.38,.20,.16)],t=>.048-.012*t,9),(q,c)=>c.set(V_SAND).lerp(new T.Color(V_BAND),.12)),m:M4(0,0,0),c:null}]);
+const viperCoilMesh=new T.Mesh(viperCoil,creatureMat(.75));viperCoilMesh.castShadow=true;viper.add(viperCoilMesh);
+const viperHead=new T.Group();viperHead.position.set(.38,.20,.16);
+const viperHeadGeo=mergeParts([
+{geo:new T.SphereGeometry(1,10,7),m:M4(.04,.02,0,.070,.040,.055),c:V_SAND},
+{geo:new T.ConeGeometry(.008,.032,5),m:M4(.015,.062,.026),c:V_BAND},
+{geo:new T.ConeGeometry(.008,.032,5),m:M4(.015,.062,-.026),c:V_BAND},
+{geo:new T.SphereGeometry(.009,6,5),m:M4(.065,.038,.033),c:'#160d04'},
+{geo:new T.SphereGeometry(.009,6,5),m:M4(.065,.038,-.033),c:'#160d04'}]);
+const viperHeadMesh=new T.Mesh(viperHeadGeo,creatureMat(.75));viperHeadMesh.castShadow=true;viperHead.add(viperHeadMesh);
+const viperTongue=new T.Group();viperTongue.position.set(.105,.005,0);
+for(const s of[-1,1]){const tn=mesh(new T.ConeGeometry(.003,.05,4),creatureMat(.6),v(.022,0,s*.007),v(1,1,1),viperTongue);paint(tn.geometry,(q,c)=>c.set('#3a1c14'));tn.rotation.z=-Math.PI/2;tn.rotation.y=-s*.3;}
+viperTongue.scale.setScalar(.01);viperHead.add(viperTongue);viper.add(viperHead);
+viper.userData.kind='viper';viper.userData.head=viperHead;viper.userData.tongue=viperTongue;
+const viperC=v(-6,0,42);viperC.y=dune(viperC.x,viperC.z);viper.position.copy(viperC);viper.rotation.y=.8;scene.add(viper);animals.push(viper);
+// Sandgrouse: a dawn pair at the pool edge, plump and small-headed.
+const G_BACK='#c8a878',G_BELLY='#e8d8b4',G_CHEST='#8a4a28',G_HEAD='#dcc9a0';
+function makeGrouse(){const g=new T.Group();
+const geo=mergeParts([
+{geo:new T.SphereGeometry(1,64,48),m:M4(-.025,.19,0,.245,.125,.115),c:function(q,c){c.set(G_BACK);if(q.y>.15){const stripe=Math.sin(q.x*165+Math.cos(q.y*135)*1.9+Math.cos(q.z*100)*.6);c.lerp(new T.Color('#32291b'),T.MathUtils.smoothstep(stripe,.1,.7)*.84);}c.lerp(new T.Color(G_BELLY),T.MathUtils.clamp((.13-q.y)*6,0,1));if(q.x>-.05)c.lerp(new T.Color(G_CHEST),T.MathUtils.clamp((.08-q.y)*8,0,.8));}},
+{geo:paint(taperTube([v(.12,.25,0),v(.18,.31,0)],t=>.045-.012*t,8),(q,c)=>c.set(G_HEAD)),m:M4(0,0,0),c:null},
+{geo:new T.SphereGeometry(1,12,9),m:M4(.205,.335,0,.065,.052,.049),c:G_HEAD},
+{geo:new T.SphereGeometry(.008,6,5),m:M4(.233,.351,.038),c:'#1a0f05'},
+{geo:new T.SphereGeometry(.008,6,5),m:M4(.233,.351,-.038),c:'#1a0f05'},
+{geo:new T.ConeGeometry(.010,.030,6),m:M4(.276,.326,0,1,1,1,0,0,-1.6),c:'#2a2018'},
+{geo:paint(taperTube([v(-.16,.18,0),v(-.30,.20,0)],t=>.035*(1-t*.6),6),(q,c)=>c.set(G_BACK)),m:M4(0,0,0,.6,1,1.8),c:null}]);
+const body=new T.Mesh(geo,creatureMat(.9));body.castShadow=true;g.add(body);g.userData.body=body;
+for(const sw of[-1,1]){
+ // Overlapping pointed coverts and flight feathers, folded down each flank.
+ for(let row=0;row<2;row++)for(let j=0;j<6;j++){
+ const x=.115-j*.042-row*.012,y=.225-row*.022,z=sw*(.105+row*.012);
+ const w=mesh(featherGeo(.11+row*.045,.032),creatureMat(.86),v(x,y,z),v(1,1,1),g);
+ paint(w.geometry,(q,c)=>{c.set(j%2?'#cfb785':'#b89a68');const edge=Math.abs(q.z)>.010;c.lerp(new T.Color('#312b21'),edge?.75:.14);});w.rotation.x=sw*1.35;w.rotation.y=sw*.10;
+ }
+ const leg=mesh(new T.CylinderGeometry(.008,.006,.095,6),creatureMat(.9),v(.04,.053,sw*.037),v(1,1,1),g);paint(leg.geometry,(q,c)=>c.set('#a8864d'));
+ for(let toe=-1;toe<=1;toe++){const foot=mesh(new T.CylinderGeometry(.003,.002,.045,5),creatureMat(.9),v(.058,.009,sw*.037+toe*.009),v(1,1,1),g);foot.rotation.z=1.50;foot.rotation.y=toe*.35;paint(foot.geometry,(q,c)=>c.set('#a8864d'));}
+}
+g.userData.kind='sandgrouse';return g;}
+const grouse=[];for(let i=0;i<3;i++){const g=makeGrouse();const a=2.4+i*.9;g.position.set(oasisC.x+Math.sin(a)*10.2,0,oasisC.z+Math.cos(a)*10.2);g.position.y=Math.max(dune(g.position.x,g.position.z)+.06,oasisC.y+.52);g.userData.gy=g.position.y;g.rotation.y=a+Math.PI/2+i;scene.add(g);grouse.push(g);animals.push(g);}
+// Scarab: rolling its ball across the sand near the caravan road.
+const scarab=new T.Group();
+const scarabParts=[
+{geo:new T.SphereGeometry(1,10,8),m:M4(0,.035,0,.055,.038,.042),c:'#18120c'},
+{geo:new T.SphereGeometry(1,8,6),m:M4(.052,.032,0,.028,.024,.030),c:'#100c08'}];
+for(const lx of[.03,-.01,-.045])for(const s of[-1,1])scarabParts.push({geo:new T.CylinderGeometry(.004,.003,.06,4),m:M4(lx,.022,s*.05,1,1,1,s*.5,0,lx>0?.9:2.2),c:'#14100a'});
+const scarabMesh=new T.Mesh(mergeParts(scarabParts),creatureMat(.3));scarabMesh.castShadow=true;scarab.add(scarabMesh);
+const scarabBall=mesh(new T.SphereGeometry(.052,10,8),creatureMat(1),v(-.105,.052,0),v(1,1,1),scarab);paint(scarabBall.geometry,(q,c)=>c.set('#5a4028'));
+scarab.userData.kind='scarab';scarab.userData.ball=scarabBall;
+const scarabC=v(4,0,-14);scene.add(scarab);animals.push(scarab);
+// Agama: yellow-spotted, doing push-ups on a warm rock by the oasis.
+const agamaC=oasisC.clone().add(v(-8.5,0,6.5));agamaC.y=dune(agamaC.x,agamaC.z);
+const agamaRock=mesh(new T.SphereGeometry(1,10,7),creatureMat(.95),v(agamaC.x,agamaC.y-.24,agamaC.z),v(.55,.32,.45),scene);paint(agamaRock.geometry,(q,c)=>c.set('#a89880').lerp(new T.Color('#7a6c5c'),T.MathUtils.clamp((agamaC.y-.24-q.y)*3,0,.6)));agamaRock.castShadow=true;
+const agamaParts=[
+{geo:paint(taperTube([v(.14,.06,0),v(0,.055,0),v(-.14,.05,0)],t=>.052-t*.012,9),(q,c)=>{c.set('#9a8a70');if(Math.sin(q.x*38)*Math.sin(q.y*46+q.z*30)>.35)c.set('#d8b83c');}),m:M4(0,0,0),c:null},
+{geo:paint(taperTube([v(-.14,.05,0),v(-.30,.055,.04),v(-.42,.075,.10)],t=>.030*(1-t*.55),7),(q,c)=>c.set('#8a7a60')),m:M4(0,0,0),c:null},
+{geo:new T.SphereGeometry(1,9,7),m:M4(.185,.065,0,.055,.042,.045),c:function(q,c){c.set('#6a92b4');if(q.y<.06)c.lerp(new T.Color('#8fb2cc'),.6);}},
+{geo:new T.SphereGeometry(.008,6,5),m:M4(.215,.085,.033),c:'#1a0f05'},
+{geo:new T.SphereGeometry(.008,6,5),m:M4(.215,.085,-.033),c:'#1a0f05'}];
+for(const s of[-1,1])agamaParts.push(
+{geo:new T.CylinderGeometry(.009,.007,.075,5),m:M4(.09,.028,s*.055,1,1,1,s*.55,0,.5),c:'#8a7a60'},
+{geo:new T.CylinderGeometry(.009,.007,.075,5),m:M4(-.08,.028,s*.055,1,1,1,s*.55,0,2.6),c:'#8a7a60'});
+const agamaMesh=new T.Mesh(mergeParts(agamaParts),creatureMat(.85));agamaMesh.castShadow=true;
+const agama=new T.Group();agama.add(agamaMesh);agama.position.set(agamaC.x,agamaC.y+.09,agamaC.z);agama.rotation.y=2.4;agama.userData.kind='agama';scene.add(agama);animals.push(agama);
 const chapters=[
 {title:'First light.<br><i>Long shadows.</i>',line:"The dunes hold the night's cold a little longer.",action:'Walk with the caravan',pos:v(-3,0,10),yaw:2.40,pitch:-.04,skyTop:'#8fb4d6',skyHor:'#f7c489',fog:.0016,ink:'#4a2f14',veil:['#3a240c30','#2a1a08e0','#22150af7'],sun:v(.92,.14,.22),sunColor:'#ffc08a',sunI:2.4,hemiI:1.5,glowAmt:1.1,kind:'caravan',wind:.5},
 {title:'The white<br><i>hour.</i>',line:'Light everywhere. Even shadows hide.',action:'Read the wind',pos:v(-2,0,34),yaw:Math.PI,pitch:.1,skyTop:'#a8cfe8',skyHor:'#f4e3c0',fog:.0040,ink:'#4a2f14',veil:['#5a3c1440','#3a240cd8','#2a1a08ee'],sun:v(.15,.95,-.2),sunColor:'#fff4e0',sunI:3.2,hemiI:2.2,glowAmt:.5,kind:'wind',wind:1.6},
@@ -306,7 +376,7 @@ const ca=elapsed*.03+.32,cx=caraC.x+Math.sin(ca)*caraR,cz=caraC.z+Math.cos(ca)*c
 if(subject){const d=subject.sub(c.pos);c.yaw=Math.atan2(d.x,d.z);c.pitch=Math.atan2(d.y,Math.hypot(d.x,d.z));}
 targetYaw=c.yaw;targetPitch=c.pitch;encountered=false;focusKind=null;$('#title').innerHTML=c.title;$('#line').textContent=c.line;$('#encounter').innerHTML=c.action+' <span aria-hidden="true">↗</span>';document.querySelectorAll('nav [data-chapter]').forEach(b=>b.setAttribute('aria-current',String(+b.dataset.chapter===chapter)));document.documentElement.style.setProperty('--ink',c.ink);soundscape.setScene(AUDIO_SCENES[chapter]);$('.veil').style.background=`linear-gradient(${c.veil[0]},transparent 28%,transparent 43%,${c.veil[1]} 77%,${c.veil[2]})`;$('#orientation').classList.remove('show');if(matchMedia('(prefers-reduced-motion: reduce)').matches){camera.position.copy(c.pos);yaw=targetYaw;pitch=targetPitch;}}
 $('#reset').onclick=()=>{down=null;changeChapter(chapter);yaw=targetYaw;pitch=targetPitch;camera.position.copy(chapters[chapter].pos);};
-const facts={caravan:['The long road.','For centuries, camel caravans crossed the Sahara between wells, carrying salt, gold and stories.'],wind:['A travelling desert.',"The Sahara is Earth's largest source of airborne dust. Some of it crosses the Atlantic and helps feed the Amazon rainforest."],sandfish:['A swimmer in sand.',"The sandfish skink doesn't burrow through loose sand - it swims through it, the way a fish moves through water."],fennec:['Ears like sails.','The fennec hunts at night. Its oversized ears shed heat and can hear prey moving under the sand.'],dove:['Laughing doves.','A year-round resident of Saharan oases and wadis. Its soft, laughing coo carries far in still evening air.']};
+const facts={caravan:['The long road.','For centuries, camel caravans crossed the Sahara between wells, carrying salt, gold and stories.'],wind:['A travelling desert.',"The Sahara is Earth's largest source of airborne dust. Some of it crosses the Atlantic and helps feed the Amazon rainforest."],sandfish:['A swimmer in sand.',"The sandfish skink doesn't burrow through loose sand - it swims through it, the way a fish moves through water."],fennec:['Ears like sails.','The fennec hunts at night. Its oversized ears shed heat and can hear prey moving under the sand.'],dove:['Laughing doves.','A year-round resident of Saharan oases and wadis. Its soft, laughing coo carries far in still evening air.'],viper:['The horned viper.','It hunts by lying buried with only its eyes and horns above the sand. Its track is a line of separate hooks - sidewinding.'],sandgrouse:['Sandgrouse at the pool.','They fly miles to water every morning. The males soak their belly feathers and carry water home to their chicks.'],scarab:['The dung roller.','A scarab pushes its ball backwards with its hind legs, steering by the sun. The ancient Egyptians saw the rising sun in that ball.'],agama:['The rock agama.','It claims its stone with push-ups, head bobbing like a tiny metronome. The yellow spots flash when it lifts into the light.']};
 function encounter(kind){const f=facts[kind];if(!f)return;encountered=true;focusKind=kind;$('#title').textContent=f[0];$('#line').textContent=f[1];$('#encounter').innerHTML='Return to the crossing <span aria-hidden="true">↙</span>';}
 $('#encounter').onclick=()=>encountered?changeChapter(chapter):encounter(chapters[chapter].kind);document.querySelectorAll('nav [data-chapter]').forEach(b=>b.onclick=()=>changeChapter(+b.dataset.chapter));$('#pause').onclick=()=>{paused=!paused;pauseUI();};$('#about').onclick=()=>$('#notes').showModal();$('#close').onclick=()=>$('#notes').close();$('#notes').onclick=e=>{if(e.target===$('#notes'))$('#notes').close();};
 canvas.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,lx:e.clientX,ly:e.clientY};dragged=false;canvas.setPointerCapture(e.pointerId);$('#orientation').classList.remove('show');});canvas.addEventListener('pointermove',e=>{if(!down)return;const dx=e.clientX-down.lx,dy=e.clientY-down.ly;if(Math.hypot(e.clientX-down.x,e.clientY-down.y)>6)dragged=true;targetYaw-=dx*.006;targetPitch=Math.max(-.65,Math.min(.85,targetPitch+dy*.004));down.lx=e.clientX;down.ly=e.clientY;});const caster=new T.Raycaster();canvas.addEventListener('pointerup',e=>{if(down&&!dragged){caster.setFromCamera(new T.Vector2(e.clientX/innerWidth*2-1,1-e.clientY/innerHeight*2),camera);const hit=caster.intersectObjects(animals,true)[0];if(hit){let o=hit.object;while(o.parent&&!o.userData.kind)o=o.parent;encounter(o.userData.kind);}}down=null;});canvas.addEventListener('pointercancel',()=>down=null);
@@ -327,9 +397,9 @@ addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updat
 const look=v(0,0,0),bg=new T.Color(),sunPos=v(0,0,0),skyTopC=new T.Color(),skyHorC=new T.Color(),sunColC=new T.Color(),glowC=new T.Color('#ffb36b');
 function animate(now){requestAnimationFrame(animate);if(document.hidden)return;const dt=Math.min((now-last)/1000,.15);last=now;if(!paused&&!encountered)elapsed+=dt;const c=chapters[chapter];
 const watching=frameKind||(encountered?focusKind:null);
-const watchAnimal=watching==='caravan'||watching==='camel'?camels[1]:watching==='sandfish'?skink:watching==='fennec'?fennec:watching==='dove'?perchedDoves[0]:null;
-if(watchAnimal){const ap=watchAnimal.position,lift=watching==='fennec'?.55:watching==='sandfish'?.3:watching==='dove'?.2:2.0,dist=watching==='caravan'||watching==='camel'?11:watching==='fennec'?3.4:watching==='sandfish'?2.4:1.9,ry=watchAnimal.rotation.y;
-const orbit=watching==='dove'?.3:(watching==='caravan'||watching==='camel')?.5:2.5;
+const watchAnimal=watching==='caravan'||watching==='camel'?camels[1]:watching==='sandfish'?skink:watching==='fennec'?fennec:watching==='dove'?perchedDoves[0]:watching==='viper'?viper:watching==='sandgrouse'?grouse[0]:watching==='scarab'?scarab:watching==='agama'?agama:null;
+if(watchAnimal){const ap=watchAnimal.position,FL={fennec:.55,sandfish:.3,dove:.2,caravan:2.0,camel:2.0,viper:.12,sandgrouse:.18,scarab:.06,agama:.15},FD={caravan:11,camel:11,fennec:3.4,sandfish:2.4,dove:1.9,viper:1.3,sandgrouse:1.6,scarab:.9,agama:1.3},FO={dove:.3,caravan:.5,camel:.5,viper:.8,sandgrouse:.5,scarab:1.0,agama:.6},lift=FL[watching]??.5,dist=FD[watching]??3,ry=watchAnimal.rotation.y;
+const orbit=FO[watching]??2.5;
 focusV.set(ap.x+Math.sin(ry+orbit)*dist,ap.y+lift+dist*.28,ap.z+Math.cos(ry+orbit)*dist);
 if(frameKind||matchMedia('(prefers-reduced-motion: reduce)').matches)camera.position.copy(focusV);else camera.position.lerp(focusV,1-Math.exp(-dt*4));
 focusV.set(ap.x,ap.y+lift,ap.z).sub(camera.position);targetYaw=Math.atan2(focusV.x,focusV.z);targetPitch=Math.atan2(focusV.y,Math.hypot(focusV.x,focusV.z));
@@ -387,6 +457,18 @@ d.position.y+=Math.sin(elapsed*9+i*2)*.05*gate;d.rotation.z=Math.sin(elapsed*.9+
 for(let i=0;i<perchedDoves.length;i++){const d=perchedDoves[i];
 const peck=(elapsed+i*2.7)%6.5;d.children[0].rotation.z=peck<.9?-.45*Math.sin(peck/.9*Math.PI):0;
 d.rotation.y+=Math.sin(elapsed*.5+i*2)*.0006;}
+{viper.rotation.y=.8+Math.sin(elapsed*.13)*.1;const vh=viper.userData;
+vh.head.rotation.y=Math.sin(elapsed*.5)*.35;vh.head.rotation.z=Math.sin(elapsed*.23)*.08;
+const tf=elapsed%5.2;vh.tongue.scale.setScalar(tf<.35?1:.01);}
+for(let i=0;i<grouse.length;i++){const g2=grouse[i],pk=(elapsed*.5+i*1.9)%4.8;
+g2.userData.body.rotation.z=pk<.7?-.5*Math.sin(pk/.7*Math.PI):0;
+g2.rotation.y+=Math.sin(elapsed*.4+i*2)*.0008;}
+{const sa2=elapsed*.12,sx3=scarabC.x+Math.sin(sa2)*1.8,sz3=scarabC.z+Math.cos(sa2)*1.8;
+scarab.position.set(sx3,dune(sx3,sz3),sz3);
+scarab.rotation.y=Math.atan2(Math.sin(sa2),Math.cos(sa2));
+scarab.userData.ball.rotation.z+=.12*1.8*dt/.052;}
+{const bob=Math.max(0,Math.sin(elapsed*2.4));agama.position.y=agamaC.y+.09+bob*bob*.028;
+agama.rotation.z=Math.sin(elapsed*1.1)*.03;}
 const sp=streaks.geometry.attributes.position;for(let i=0;i<sp.count;i++){let x=(streakBase[i]+elapsed*c.wind*9)%140;if(x>70)x-=140;if(x<-70)x+=140;sp.setX(i,x);}sp.needsUpdate=true;streaks.position.set(camera.position.x,0,camera.position.z);streaks.material.opacity=.35*(1-night*.6);
 canvas.dataset.yaw=yaw.toFixed(5);canvas.dataset.pitch=pitch.toFixed(5);canvas.dataset.entryYaw=c.yaw.toFixed(5);canvas.dataset.entryPitch=c.pitch.toFixed(5);document.body.dataset.chapter=chapter;$('#compass').textContent=['N','E','S','W'][Math.floor((((yaw*180/Math.PI)%360+360+45)%360)/90)]+' · '+String(Math.round((yaw*180/Math.PI%360+360)%360)).padStart(3,'0')+'°';renderer.render(scene,camera);if(++frames===2){$('#status').remove();}if(frames===500)$('#orientation').classList.remove('show');}
 changeChapter(0);requestAnimationFrame(animate);
