@@ -297,7 +297,7 @@ let chapter=0,yaw=2.75,pitch=.05,targetYaw=2.75,targetPitch=.05,night=0,paused=m
 let focusKind=null;const focusV=v(0,0,0);const frameKind=new URLSearchParams(location.search).get('frame');
 if(new URLSearchParams(location.search).get('clean'))document.body.classList.add('clean');
 function groundY(p){p.y=dune(p.x,p.z)+2.6;return p;}chapters.forEach(c=>groundY(c.pos));chapters[2].pos.y+=4.5;camera.position.copy(chapters[0].pos);
-function pauseUI(){const b=$('#pause');b.setAttribute('aria-pressed',String(paused));b.setAttribute('aria-label',paused?'Resume ambient motion':'Pause ambient motion');b.textContent=paused?'▷':'Ⅱ';}pauseUI();
+function pauseUI(){const b=$('#pause');b.setAttribute('aria-pressed',String(paused));b.setAttribute('aria-label',paused?'Resume ambient motion':'Pause ambient motion');}pauseUI();
 function changeChapter(n){chapter=(n+4)%4;const c=chapters[chapter];
 const ca=elapsed*.03+.32,cx=caraC.x+Math.sin(ca)*caraR,cz=caraC.z+Math.cos(ca)*caraR;const subject=chapter===0?v(cx,dune(cx,cz)+1.2,cz):chapter===2?oasisC.clone().add(v(0,.35,0)):chapter===3?fennec.position.clone().add(v(0,.7,0)):null;
 if(subject){const d=subject.sub(c.pos);c.yaw=Math.atan2(d.x,d.z);c.pitch=Math.atan2(d.y,Math.hypot(d.x,d.z));}
@@ -317,7 +317,7 @@ const AUDIO_SCENES=['dawn','whiteHour','oasis','night'];
 const soundscape=createSoundscape(soundProgram,{masterGain:.9});
 let audioStarted=false;$('#sound').onclick=async()=>{
 if(!audioStarted){audioStarted=true;await soundscape.start(AUDIO_SCENES[chapter]);}else soundscape.setOn(!soundscape.on);
-$('#sound').setAttribute('aria-pressed',String(soundscape.on));$('#sound').setAttribute('aria-label',soundscape.on?'Turn desert sound off':'Turn desert sound on');$('#sound').textContent=soundscape.on?'\u266B':'\u266A';};
+$('#sound').setAttribute('aria-pressed',String(soundscape.on));$('#sound').setAttribute('aria-label',soundscape.on?'Turn desert sound off':'Turn desert sound on');};
 document.addEventListener('visibilitychange',()=>{last=performance.now();soundscape.handleVisibility();});
 window.__soundscape=soundscape;
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
@@ -387,3 +387,20 @@ d.rotation.y+=Math.sin(elapsed*.5+i*2)*.0006;}
 const sp=streaks.geometry.attributes.position;for(let i=0;i<sp.count;i++){let x=(streakBase[i]+elapsed*c.wind*9)%140;if(x>70)x-=140;if(x<-70)x+=140;sp.setX(i,x);}sp.needsUpdate=true;streaks.position.set(camera.position.x,0,camera.position.z);streaks.material.opacity=.35*(1-night*.6);
 canvas.dataset.yaw=yaw.toFixed(5);canvas.dataset.pitch=pitch.toFixed(5);canvas.dataset.entryYaw=c.yaw.toFixed(5);canvas.dataset.entryPitch=c.pitch.toFixed(5);document.body.dataset.chapter=chapter;$('#compass').textContent=['N','E','S','W'][Math.floor((((yaw*180/Math.PI)%360+360+45)%360)/90)]+' · '+String(Math.round((yaw*180/Math.PI%360+360)%360)).padStart(3,'0')+'°';renderer.render(scene,camera);if(++frames===2){$('#status').remove();}if(frames===500)$('#orientation').classList.remove('show');}
 changeChapter(0);requestAnimationFrame(animate);
+
+/* Chrome: the desert leads. The caravan tools greet on entry, then retire;
+   they visit when called (top/bottom edge, hint star, keyboard) and leave when left. */
+const PIN_KEY='sahara-chrome-pin',TOP_ZONE=96,BOTTOM_ZONE=150,RETIRE_MS=2600;
+let pinned=false;try{pinned=localStorage.getItem(PIN_KEY)==='1'}catch(e){}
+let chromeOn=true,focusWithin=false,retireTimer=null;const pinBtn=$('#pin');
+function applyChrome(){document.body.classList.toggle('chrome-on',chromeOn||pinned);}
+function pinUI(){pinBtn.setAttribute('aria-pressed',String(pinned));pinBtn.setAttribute('aria-label',pinned?'Let controls retire':'Keep controls visible');}
+function retireSoon(){clearTimeout(retireTimer);retireTimer=setTimeout(()=>{if(!focusWithin){chromeOn=false;applyChrome();}},RETIRE_MS);}
+function wakeChrome(){chromeOn=true;applyChrome();retireSoon();}
+pinBtn.onclick=()=>{pinned=!pinned;try{pinned?localStorage.setItem(PIN_KEY,'1'):localStorage.removeItem(PIN_KEY)}catch(e){}if(pinned)chromeOn=true;pinUI();applyChrome();};
+$('#chrome-hint').onclick=wakeChrome;
+document.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;if(e.target.closest&&e.target.closest('#chrome-hint'))return;if(e.clientY<TOP_ZONE||e.clientY>innerHeight-BOTTOM_ZONE)wakeChrome();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!pinned){focusWithin=false;chromeOn=false;applyChrome();}});
+document.addEventListener('focusin',e=>{if(e.target.closest&&e.target.closest('header,.crossing,#chrome-hint')){focusWithin=true;clearTimeout(retireTimer);chromeOn=true;applyChrome();}});
+document.addEventListener('focusout',e=>{if(!e.relatedTarget||!e.relatedTarget.closest||!e.relatedTarget.closest('header,.crossing')){focusWithin=false;retireSoon();}});
+pinUI();applyChrome();retireSoon();

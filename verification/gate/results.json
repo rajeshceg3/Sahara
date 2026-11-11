@@ -1,0 +1,22 @@
+[
+  {
+    "width": 320,
+    "motion": "reduce",
+    "ch": 2,
+    "resetHeld": true,
+    "audioOff": true,
+    "targets": true,
+    "labels": true,
+    "encounter": true
+  },
+  {
+    "width": 320,
+    "motion": "reduce",
+    "ch": 3,
+    "resetHeld": true,
+    "audioOff": true,
+    "targets": true,
+    "labels": true,
+    "encounter": true
+  }
+]
