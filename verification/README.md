@@ -55,3 +55,22 @@ from the live site.
 Honest below-bar notes: creatures remain stylised 3D - folded-wing feather
 rows read faintly in dawn light, the fur shell is a halo of guard hairs not
 strand fur, and no photographic indistinguishability is claimed.
+
+## Round 2b (2026-11-11, camel anatomy + dove feather follow-up)
+
+Camel: torso reshaped (deeper chest, stronger rear belly tuck, narrower hips,
+rounded rump), thicker S-curved neck base rooted deeper in the chest, thighs
+blended into the barrel, slimmer knee calluses; the full-torso blanket cover
+became a draped saddle cloth with woven stripes, tassel hem and a muted
+palette. Dove: feathers extruded to real thickness so rows cast edge shadows,
+slimmer streamlined flyer body, folded primaries lie flat on perched birds,
+brighter covert contrast.
+
+Executed locally (real Chromium, SwiftShader): behavior suite WIDTH=390
+QUICK=1 green; scene-gate full matrix Passed - 320, 390, 1440 in both
+no-preference and reduce (1440 split by chapter). Frame captures iterated
+visually against reference photos; camel frame shots spaced over the gait so
+legs are verified on open sand, not in a dune dip.
+
+Honest below-bar notes: still stylised 3D; the saddle cloth rim is a hard
+edge at some angles, and dawn backlight flattens feather contrast.
