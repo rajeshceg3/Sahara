@@ -102,3 +102,28 @@ Honest below-bar notes: still stylised 3D. The viper's scales are colour bands
 not relief, the sandgrouse barring is procedural striping not feather-by-
 feather patterning, and the scarab and agama are small and simply lit at
 scene distance. No photographic indistinguishability is claimed.
+
+## Round 3 (2026-11-11, close-up material pass)
+
+A warm view-dependent rim light (fresnel into emissive via onBeforeCompile,
+opt-in per material, no extra lights) suggests dawn backlight on fennec, doves,
+grouse, agama and sandfish; the fennec inner-ear glow is stronger, reading as
+thin-tissue translucency at sunrise. The viper carries a keeled-scale bump
+texture and a blotch pattern closer to Cerastes reference than clean chevrons;
+doves and sandgrouse carry a feather-barb bump grain; the perched dove's
+folded wing feathers were re-seated onto the body (they floated like loose
+slats); the agama head was shrunk and desaturated toward its grey-blue
+breeding tone; caravan blanket palette lightened so cloth stops reading as a
+black slab at dawn.
+
+Executed locally (real Chromium, SwiftShader): behavior suite WIDTH=390
+QUICK=1 green; scene-gate full matrix Passed - 320, 390 and 1440 in both
+no-preference and reduce (1440 split by chapter; no-preference quiet/pinned
+tails as separate cells via SKIP_QUIET). taperTube and mergeParts now carry
+UVs so relief textures can reach any creature.
+
+Honest below-bar notes: the rim is fresnel-into-emissive, not real subsurface
+scattering; bump maps are texture relief, not geometry; the viper's blotch
+pattern sits in its vertex colours yet still reads washed at close frame
+angles in dawn light, and its coil silhouette has small tube-end fins. Still
+stylised 3D; no photographic indistinguishability is claimed.
