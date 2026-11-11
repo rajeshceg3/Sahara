@@ -22,7 +22,7 @@ try{
  await p.focus('nav [aria-current=true]');await p.keyboard.press('ArrowRight');await p.waitForFunction(()=>+document.body.dataset.chapter===2,{timeout:5000});
  await p.click('#about');assert.equal(await p.$eval('dialog',e=>e.open),true);await p.keyboard.press('Escape');assert.equal(await p.$eval('dialog',e=>e.open),false);
  await p.close();
- {const q=await b.newPage();await q.bringToFront();await q.setViewport({width,height:844});await q.emulateMediaFeatures([{name:'prefers-reduced-motion',value:motion}]);await q.evaluateOnNewDocument(()=>{try{localStorage.removeItem('sahara-chrome-pin')}catch(e){}});await q.goto(url);await q.waitForFunction(()=>!document.querySelector('#status'));await q.evaluate(()=>{try{localStorage.removeItem('sahara-chrome-pin')}catch(e){}});
+ if(!process.env.SKIP_QUIET){const q=await b.newPage();await q.bringToFront();await q.setViewport({width,height:844});await q.emulateMediaFeatures([{name:'prefers-reduced-motion',value:motion}]);await q.evaluateOnNewDocument(()=>{try{localStorage.removeItem('sahara-chrome-pin')}catch(e){}});await q.goto(url);await q.waitForFunction(()=>!document.querySelector('#status'));await q.evaluate(()=>{try{localStorage.removeItem('sahara-chrome-pin')}catch(e){}});
  await new Promise(r=>setTimeout(r,3400));
  assert.ok(await q.$('#chrome-hint'),'chrome retired and the caravan-star hint is showing');
  assert.equal(await q.$eval('header',e=>getComputedStyle(e).visibility),'hidden','toolbar retired');
@@ -39,6 +39,9 @@ try{
  // retire. One round-trip, no sleeps, with one tap-and-focus retry.
  let st;
  for(let tries=0;tries<2;tries++){
+   // On slow software renderers the woken header transitions in over several
+   // hundred ms; wait for the state, not an instant, before focusing the pin.
+   try{await q.waitForFunction(()=>document.body.classList.contains('chrome-on')&&getComputedStyle(document.querySelector('header')).visibility==='visible',{timeout:5000});}catch(e){}
    st=await q.evaluate(()=>{document.querySelector('#pin').focus();return {ae:document.activeElement&&document.activeElement.id,vis:getComputedStyle(document.querySelector('header')).visibility,pr:document.querySelector('#pin').getAttribute('aria-pressed')}});
    if(st.ae==='pin'&&st.vis==='visible')break;
    const hc2=await q.$eval('#chrome-hint',e=>{const r=e.getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2}});
