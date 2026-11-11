@@ -127,3 +127,26 @@ scattering; bump maps are texture relief, not geometry; the viper's blotch
 pattern sits in its vertex colours yet still reads washed at close frame
 angles in dawn light, and its coil silhouette has small tube-end fins. Still
 stylised 3D; no photographic indistinguishability is claimed.
+
+## Round 4 (2026-11-11, viper geometry and grouse plumage)
+
+taperTube gained opt-in stable frames ({flat:true}, fixed-up parallel
+transport instead of Frenet frames) and closed end caps. The viper coil is
+slimmer with stable frames, ending the self-intersection folds at the tight
+bends, and sits half-buried, rotated off the dune crest behind it (the pale
+wedge in earlier frames was a real knife-edge dune crest, not geometry - a
+raycast identified the ground plane, and dune() sampling confirmed a smooth
+crest). Its pattern is now broad Cerastes blotches in vertex colours: an
+unlit vertex-colour probe proved earlier "washed out" frames were pattern
+frequencies too low to read as blotches, not a colour-path bug. Sandgrouse
+barring now continues over neck and head, with buff speckles between bars.
+
+Executed locally (real Chromium, SwiftShader): behavior suite WIDTH=390
+QUICK=1 green; scene-gate full matrix Passed - 320, 390 and 1440 in both
+no-preference and reduce (1440 one chapter per cell; no-preference
+quiet/pinned tails as separate cells).
+
+Honest below-bar notes: blotches are vertex colours, not scale-by-scale
+patterning; the scale relief is bump texture; the dune crest behind the viper
+still reads sharply at one frame angle. Still stylised 3D; no photographic
+indistinguishability is claimed.

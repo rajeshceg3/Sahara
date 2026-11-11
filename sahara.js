@@ -104,13 +104,20 @@ for(let i=0;i<p.count;i++){vs.fromBufferAttribute(p,i).applyMatrix4(part.m);Ps.p
 if(typeof part.c==='function')part.c(vs,cc,i);else if(part.c!=null)cc.set(part.c);else if(g.attributes.color)cc.setRGB(g.attributes.color.getX(i),g.attributes.color.getY(i),g.attributes.color.getZ(i));else cc.set('#ffffff');Cs.push(cc.r,cc.g,cc.b);}}
 const out=new T.BufferGeometry();out.setAttribute('position',new T.BufferAttribute(new Float32Array(Ps),3));out.setAttribute('normal',new T.BufferAttribute(new Float32Array(Ns),3));out.setAttribute('color',new T.BufferAttribute(new Float32Array(Cs),3));out.setAttribute('uv',new T.BufferAttribute(new Float32Array(UVs),2));return out;}
 const M4=(x,y,z,sx=1,sy=1,sz=1,rx=0,ry=0,rz=0)=>new T.Matrix4().compose(v(x,y,z),new T.Quaternion().setFromEuler(new T.Euler(rx,ry,rz)),v(sx,sy,sz));
-function taperTube(pts,rFn,sides=9){const curve=new T.CatmullRomCurve3(pts);const segs=Math.max(10,pts.length*5);const frames=curve.computeFrenetFrames(segs,false);const P=[],N=[],I=[];
-const UV=[];
-for(let i=0;i<=segs;i++){const t=i/segs,c=curve.getPoint(t),r=rFn(t),nrm=frames.normals[i],bin=frames.binormals[i];
+function taperTube(pts,rFn,sides=9,opts={}){const curve=new T.CatmullRomCurve3(pts);const segs=Math.max(10,pts.length*5);const frames=curve.computeFrenetFrames(segs,false);const P=[],N=[],I=[];
+const UV=[];const up=new T.Vector3(0,1,0),tan=new T.Vector3();
+for(let i=0;i<=segs;i++){const t=i/segs,c=curve.getPoint(t),r=rFn(t);let nrm,bin;
+if(opts.flat){curve.getTangent(t,tan);nrm=new T.Vector3().crossVectors(up,tan);if(nrm.lengthSq()<.01)nrm.set(1,0,0);nrm.normalize();bin=new T.Vector3().crossVectors(tan,nrm).normalize();}
+else{nrm=frames.normals[i];bin=frames.binormals[i];}
 for(let s=0;s<sides;s++){const a=s/sides*Math.PI*2,nx=Math.cos(a),ny=Math.sin(a);
 P.push(c.x+(nrm.x*nx+bin.x*ny)*r,c.y+(nrm.y*nx+bin.y*ny)*r,c.z+(nrm.z*nx+bin.z*ny)*r);
 N.push(nrm.x*nx+bin.x*ny,nrm.y*nx+bin.y*ny,nrm.z*nx+bin.z*ny);UV.push(t*8,s/sides);}}
 for(let i=0;i<segs;i++)for(let s=0;s<sides;s++){const a=i*sides+s,b=i*sides+(s+1)%sides,c2=(i+1)*sides+s,d=(i+1)*sides+(s+1)%sides;I.push(a,c2,b,b,c2,d);}
+if(opts.caps){const c0=curve.getPoint(0),c1=curve.getPoint(1);const t0=curve.getTangent(0,new T.Vector3()),t1=curve.getTangent(1,new T.Vector3());
+let base=P.length/3;P.push(c0.x,c0.y,c0.z);N.push(-t0.x,-t0.y,-t0.z);UV.push(0,.5);
+for(let s=0;s<sides;s++)I.push(base,(s+1)%sides,s);
+base=P.length/3;P.push(c1.x,c1.y,c1.z);N.push(t1.x,t1.y,t1.z);UV.push(8,.5);
+const ring=segs*sides;for(let s=0;s<sides;s++)I.push(base,ring+s,ring+(s+1)%sides);}
 const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(new Float32Array(P),3));g.setAttribute('normal',new T.BufferAttribute(new Float32Array(N),3));g.setAttribute('uv',new T.BufferAttribute(new Float32Array(UV),2));g.setIndex(I);return g;}
 function furTex(streak,alpha=.12,strokes=1100){const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,128,128);x.strokeStyle=streak;x.lineWidth=.8;for(let i=0;i<strokes;i++){x.globalAlpha=alpha*(.4+Math.random());const px=Math.random()*128,py=Math.random()*128,l=2+Math.random()*4,a=Math.PI/2+(Math.random()-.5)*.8;x.beginPath();x.moveTo(px,py);x.lineTo(px+Math.cos(a)*l,py+Math.sin(a)*l);x.stroke();}const t=new T.CanvasTexture(cv);t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;return t;}
 function featherGeo(len,wid){const s=new T.Shape();s.moveTo(len*.08,-wid*.30);s.quadraticCurveTo(-len*.30,-wid*.62,-len*.70,-wid*.46);s.quadraticCurveTo(-len*.96,-wid*.28,-len,0);s.quadraticCurveTo(-len*.96,wid*.28,-len*.70,wid*.46);s.quadraticCurveTo(-len*.30,wid*.62,len*.08,wid*.30);s.quadraticCurveTo(len*.16,0,len*.08,-wid*.30);const g=new T.ExtrudeGeometry(s,{depth:.004,bevelEnabled:false});g.rotateX(-Math.PI/2);return g;}
@@ -313,9 +320,9 @@ d.userData.kind='dove';const a=1.1+i*1.9;d.position.set(oasisC.x+Math.sin(a)*10.
 const V_SAND='#d4b47c',V_BAND='#a8804a',V_BELLY='#ecd9ac';
 const viper=new T.Group();
 const viperCoil=mergeParts([
-{geo:paint(taperTube([v(-.19,.035,.03),v(-.03,.035,.15),v(.15,.035,.09),v(.14,.035,-.06),v(-.02,.035,-.11),v(-.13,.035,-.04)],t=>.058-.016*t,9),(q,c)=>{c.set(V_SAND);const bl=Math.sin(q.x*31+1.3)*Math.sin(q.z*27-.4)+.35*Math.sin(q.x*57+q.z*49);if(bl>.42)c.lerp(new T.Color(V_BAND),.68);c.lerp(new T.Color(V_BELLY),T.MathUtils.clamp((.03-q.y)*12,0,.45));}),m:M4(0,0,0),c:null},
+{geo:paint(taperTube([v(-.19,.035,.03),v(-.03,.035,.15),v(.16,.035,.08),v(.13,.035,-.07),v(-.04,.035,-.12),v(-.15,.035,-.03)],t=>.045-.012*t,9,{flat:true}),(q,c)=>{c.set(V_SAND);const bl=Math.sin(q.x*55+.7)*Math.sin(q.z*48-.3)+.35*Math.sin(q.x*97+q.z*83);if(bl>.12)c.lerp(new T.Color(V_BAND),T.MathUtils.clamp(bl*.95,0,.78));c.lerp(new T.Color(V_BELLY),T.MathUtils.clamp((.03-q.y)*12,0,.35));}),m:M4(0,0,0),c:null},
 {geo:paint(taperTube([v(.14,.045,.08),v(.28,.10,.13),v(.38,.20,.16)],t=>.048-.012*t,9),(q,c)=>c.set(V_SAND).lerp(new T.Color(V_BAND),.12)),m:M4(0,0,0),c:null}]);
-const viperMat=creatureMat(.72,null,{bumpMap:scaleBumpTex(),bumpScale:.45,rim:.04,rimColor:'#ffe8c4'});
+const viperMat=creatureMat(.72,null,{bumpMap:scaleBumpTex(),bumpScale:.6,rim:.04,rimColor:'#ffe8c4'});
 const viperCoilMesh=new T.Mesh(viperCoil,viperMat);viperCoilMesh.castShadow=true;viper.add(viperCoilMesh);
 const viperHead=new T.Group();viperHead.position.set(.38,.20,.16);
 const viperHeadGeo=mergeParts([
@@ -329,14 +336,14 @@ const viperTongue=new T.Group();viperTongue.position.set(.105,.005,0);
 for(const s of[-1,1]){const tn=mesh(new T.ConeGeometry(.003,.05,4),creatureMat(.6),v(.022,0,s*.007),v(1,1,1),viperTongue);paint(tn.geometry,(q,c)=>c.set('#3a1c14'));tn.rotation.z=-Math.PI/2;tn.rotation.y=-s*.3;}
 viperTongue.scale.setScalar(.01);viperHead.add(viperTongue);viper.add(viperHead);
 viper.userData.kind='viper';viper.userData.head=viperHead;viper.userData.tongue=viperTongue;
-const viperC=v(-6,0,42);viperC.y=dune(viperC.x,viperC.z);viper.position.copy(viperC);viper.rotation.y=.8;scene.add(viper);animals.push(viper);
+const viperC=v(-6,0,42);viperC.y=dune(viperC.x,viperC.z);viper.position.copy(viperC).add(v(0,-.015,0));viper.rotation.y=1.35;scene.add(viper);animals.push(viper);
 // Sandgrouse: a dawn pair at the pool edge, plump and small-headed.
 const G_BACK='#c8a878',G_BELLY='#e8d8b4',G_CHEST='#8a4a28',G_HEAD='#dcc9a0';
 function makeGrouse(){const g=new T.Group();
 const geo=mergeParts([
-{geo:new T.SphereGeometry(1,64,48),m:M4(-.025,.19,0,.245,.125,.115),c:function(q,c){c.set(G_BACK);if(q.y>.15){const stripe=Math.sin(q.x*165+Math.cos(q.y*135)*1.9+Math.cos(q.z*100)*.6);c.lerp(new T.Color('#32291b'),T.MathUtils.smoothstep(stripe,.1,.7)*.84);}c.lerp(new T.Color(G_BELLY),T.MathUtils.clamp((.13-q.y)*6,0,1));if(q.x>-.05)c.lerp(new T.Color(G_CHEST),T.MathUtils.clamp((.08-q.y)*8,0,.8));}},
-{geo:paint(taperTube([v(.12,.25,0),v(.18,.31,0)],t=>.045-.012*t,8),(q,c)=>c.set(G_HEAD)),m:M4(0,0,0),c:null},
-{geo:new T.SphereGeometry(1,12,9),m:M4(.205,.335,0,.065,.052,.049),c:G_HEAD},
+{geo:new T.SphereGeometry(1,64,48),m:M4(-.025,.19,0,.245,.125,.115),c:function(q,c){c.set(G_BACK);if(q.y>.15){const stripe=Math.sin(q.x*165+Math.cos(q.y*135)*1.9+Math.cos(q.z*100)*.6);c.lerp(new T.Color('#32291b'),T.MathUtils.smoothstep(stripe,.1,.7)*.84);if(Math.sin(q.x*310+q.z*290)*Math.sin(q.y*330-q.z*140)>.72)c.lerp(new T.Color('#e8d9b8'),.5);}c.lerp(new T.Color(G_BELLY),T.MathUtils.clamp((.13-q.y)*6,0,1));if(q.x>-.05)c.lerp(new T.Color(G_CHEST),T.MathUtils.clamp((.08-q.y)*8,0,.8));}},
+{geo:paint(taperTube([v(.12,.25,0),v(.18,.31,0)],t=>.045-.012*t,8),(q,c)=>{c.set(G_HEAD);if(Math.sin(q.y*230+Math.sin(q.x*150))>.25)c.lerp(new T.Color('#33291b'),.5);}),m:M4(0,0,0),c:null},
+{geo:new T.SphereGeometry(1,12,9),m:M4(.205,.335,0,.065,.052,.049),c:function(q,c){c.set(G_HEAD);if(Math.sin(q.y*240+Math.sin(q.z*160))>.3)c.lerp(new T.Color('#33291b'),.45);}},
 {geo:new T.SphereGeometry(.008,6,5),m:M4(.233,.351,.038),c:'#1a0f05'},
 {geo:new T.SphereGeometry(.008,6,5),m:M4(.233,.351,-.038),c:'#1a0f05'},
 {geo:new T.ConeGeometry(.010,.030,6),m:M4(.276,.326,0,1,1,1,0,0,-1.6),c:'#2a2018'},
