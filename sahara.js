@@ -112,7 +112,7 @@ N.push(nrm.x*nx+bin.x*ny,nrm.y*nx+bin.y*ny,nrm.z*nx+bin.z*ny);}}
 for(let i=0;i<segs;i++)for(let s=0;s<sides;s++){const a=i*sides+s,b=i*sides+(s+1)%sides,c2=(i+1)*sides+s,d=(i+1)*sides+(s+1)%sides;I.push(a,c2,b,b,c2,d);}
 const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(new Float32Array(P),3));g.setAttribute('normal',new T.BufferAttribute(new Float32Array(N),3));g.setIndex(I);return g;}
 function furTex(streak,alpha=.12,strokes=1100){const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,128,128);x.strokeStyle=streak;x.lineWidth=.8;for(let i=0;i<strokes;i++){x.globalAlpha=alpha*(.4+Math.random());const px=Math.random()*128,py=Math.random()*128,l=2+Math.random()*4,a=Math.PI/2+(Math.random()-.5)*.8;x.beginPath();x.moveTo(px,py);x.lineTo(px+Math.cos(a)*l,py+Math.sin(a)*l);x.stroke();}const t=new T.CanvasTexture(cv);t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;return t;}
-function featherGeo(len,wid){const s=new T.Shape();s.moveTo(len*.08,-wid*.30);s.quadraticCurveTo(-len*.30,-wid*.62,-len*.70,-wid*.46);s.quadraticCurveTo(-len*.96,-wid*.28,-len,0);s.quadraticCurveTo(-len*.96,wid*.28,-len*.70,wid*.46);s.quadraticCurveTo(-len*.30,wid*.62,len*.08,wid*.30);s.quadraticCurveTo(len*.16,0,len*.08,-wid*.30);const g=new T.ShapeGeometry(s,5);g.rotateX(-Math.PI/2);return g;}
+function featherGeo(len,wid){const s=new T.Shape();s.moveTo(len*.08,-wid*.30);s.quadraticCurveTo(-len*.30,-wid*.62,-len*.70,-wid*.46);s.quadraticCurveTo(-len*.96,-wid*.28,-len,0);s.quadraticCurveTo(-len*.96,wid*.28,-len*.70,wid*.46);s.quadraticCurveTo(-len*.30,wid*.62,len*.08,wid*.30);s.quadraticCurveTo(len*.16,0,len*.08,-wid*.30);const g=new T.ExtrudeGeometry(s,{depth:.004,bevelEnabled:false});g.rotateX(-Math.PI/2);return g;}
 function strandTex(streak,alpha=.5,strokes=1500){const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,128,128);x.strokeStyle=streak;x.lineWidth=.9;for(let i=0;i<strokes;i++){x.globalAlpha=alpha*(.4+Math.random());const px=Math.random()*128,py=Math.random()*128,l=2.5+Math.random()*5,a=Math.PI/2+(Math.random()-.5)*.9;x.beginPath();x.moveTo(px,py);x.lineTo(px+Math.cos(a)*l,py+Math.sin(a)*l);x.stroke();}const t=new T.CanvasTexture(cv);t.wrapS=t.wrapT=T.RepeatWrapping;return t;}
 const creatureMat=(rough=.9,map=null,extra={})=>new T.MeshStandardMaterial(Object.assign({vertexColors:true,map,roughness:rough},extra));
 // Coat references: wild dromedary - tawny flank, darker woolly hump crest, pale legs and belly.
@@ -126,12 +126,15 @@ y+=Math.exp(-(((x+.08)/.34)**2))*Math.max(0,y)*.55;
 y+=Math.exp(-(((x-.78)/.3)**2))*Math.max(0,y)*.16;
 y-=Math.exp(-(((x+1.1)/.28)**2))*Math.max(0,y)*.20;
 y-=Math.exp(-(((x-.9)/.22)**2))*Math.max(0,-y)*.30;
-y-=.05*Math.exp(-((x/.7)**2))*Math.max(0,-y+.2);
-z*=1-.10*Math.exp(-(((x+1.05)/.3)**2));
+y-=Math.exp(-(((x-.62)/.30)**2))*Math.max(0,-y)*.26;
+y+=Math.exp(-(((x+.72)/.34)**2))*Math.max(0,-y)*.30;
+y-=Math.exp(-(((x+1.28)/.18)**2))*Math.max(0,y+.2)*.28;
+y-=.10*Math.exp(-(((x+.25)/.6)**2))*Math.max(0,-y+.2);
+z*=1-.17*Math.exp(-(((x+1.0)/.35)**2));
 p.setXYZ(i,x,y+1.62,z);}
 geo.computeVertexNormals();return paint(geo,coat);}
 function makeCamel(blanket){const g=new T.Group();
-const neck=paint(taperTube([v(.78,1.42,0),v(1.10,1.50,0),v(1.34,1.90,0),v(1.47,2.22,0)],t=>.005+.21*(1-t)+.02*Math.sin(t*9),9),coat);
+const neck=paint(taperTube([v(.70,1.36,0),v(1.06,1.48,0),v(1.34,1.90,0),v(1.47,2.22,0)],t=>.01+.25*(1-t)+.02*Math.sin(t*9),9),coat);
 const mane=paint(taperTube([v(.90,1.75,0),v(1.18,1.82,0),v(1.38,2.12,0),v(1.47,2.30,0)],t=>.03*(1-t*.6),7),function(q,c){c.set(C_WOOL);});
 mane.scale(.55,1,1);
 const beard=paint(taperTube([v(1.16,1.52,0),v(1.36,1.72,0),v(1.46,2.00,0)],t=>.038*(1-t*.5),7),function(q,c){c.set(C_WOOL);});
@@ -158,11 +161,11 @@ const legG=new T.Group();legG.position.set(hipX,hipY,z);
 const upLen=hipY-(front?.82:.80);
 const up=mergeParts([
 {geo:new T.CylinderGeometry(front?.105:.13,front?.082:.10,upLen,8),m:M4(0,-upLen/2,0),c:function(q,c){c.set(front?C_FLANK:C_BACK).lerp(new T.Color(C_BELLY),.3);}},
-front?{geo:new T.SphereGeometry(1,7,6),m:M4(0,-.16,0,.11,.18,.10),c:C_FLANK}:{geo:new T.SphereGeometry(1,8,6),m:M4(-.02,-.16,0,.17,.28,.135),c:C_BACK}]);
+front?{geo:new T.SphereGeometry(1,8,7),m:M4(0,-.10,0,.14,.26,.12),c:C_FLANK}:{geo:new T.SphereGeometry(1,9,7),m:M4(-.03,-.12,0,.20,.32,.16),c:C_BACK}]);
 const upMesh=new T.Mesh(up,camelMatGlobal);upMesh.castShadow=true;legG.add(upMesh);
 const kneeG=new T.Group();kneeG.position.set(front?.02:-.05,-upLen,0);
 const low=mergeParts([
-{geo:new T.SphereGeometry(front?.085:.10,8,6),m:M4(0,0,0),c:'#8a5f3a'},
+{geo:new T.SphereGeometry(front?.075:.088,8,6),m:M4(0,0,0),c:'#8a5f3a'},
 {geo:new T.CylinderGeometry(.070,.056,.60,7),m:M4(front?.02:.02,-.31,0),c:C_LEG},
 {geo:new T.SphereGeometry(1,8,6),m:M4(front?.06:.04,-.615,0,.145,.055,.115),c:C_LEG},
 {geo:new T.SphereGeometry(1,6,5),m:M4(front?.13:.11,-.63,.034,.05,.034,.034),c:'#a8855c'},
@@ -177,15 +180,15 @@ const tailGeo=mergeParts([
 const tailMesh=new T.Mesh(tailGeo,camelMatGlobal);tailMesh.castShadow=true;tailG.add(tailMesh);g.add(tailG);
 // Woven blanket with tassel hem, girth rope and saddle roll.
 const bcol=new T.Color(blanket);
-const shell=new T.CylinderGeometry(.85,.92,1.10,14,1,true,-Math.PI*.46,Math.PI*.92);shell.rotateZ(Math.PI/2);
-const blanketParts=[{geo:paint(shell,(q,c)=>{c.copy(bcol);if(Math.abs(q.z)>.42||Math.abs(q.x+.1)>.42)c.multiplyScalar(.55);}),m:M4(-.14,1.80,0,1,.88,1.04),c:null},
-{geo:new T.TorusGeometry(.66,.016,5,20),m:M4(-.14,1.62,0,1,1.05,1,0,0,0),c:'#4a3018'},
-{geo:new T.CylinderGeometry(.065,.065,.5,7),m:M4(-.14,2.22,0,1,1,1,Math.PI/2,0,0),c:new T.Color(blanket).multiplyScalar(.7).getStyle()}];
-for(let k=0;k<9;k++){const bx=-.14-.46+k*.115;for(const s of[-1,1])blanketParts.push({geo:new T.ConeGeometry(.02,.075,4),m:M4(bx,1.06,s*.65,1,1,1,Math.PI),c:'#d9c49a'});}
+const shell=new T.CylinderGeometry(.72,.88,.78,14,1,true,-Math.PI*.30,Math.PI*.60);shell.rotateZ(Math.PI/2);
+const blanketParts=[{geo:paint(shell,(q,c)=>{c.copy(bcol);if(Math.abs(q.z)>.30)c.multiplyScalar(.6);const stripe=Math.floor((q.x+.5)*9);if(stripe%3===0)c.multiplyScalar(.82);if(stripe%3===1)c.lerp(new T.Color('#e8d9b0'),.30);}),m:M4(-.02,1.97,0,1,.55,1.02,0,0,-.06),c:null},
+{geo:new T.TorusGeometry(.60,.016,5,20),m:M4(-.10,1.78,0,1,1.05,1,0,0,0),c:'#4a3018'},
+{geo:new T.CylinderGeometry(.06,.06,.44,7),m:M4(-.10,2.28,0,1,1,1,Math.PI/2,0,0),c:new T.Color(blanket).multiplyScalar(.7).getStyle()}];
+for(let k=0;k<7;k++){const bx=-.10-.33+k*.11;for(const s of[-1,1])blanketParts.push({geo:new T.ConeGeometry(.02,.075,4),m:M4(bx,1.32,s*.60,1,1,1,Math.PI),c:'#d9c49a'});}
 const blanketMesh=new T.Mesh(mergeParts(blanketParts),new T.MeshStandardMaterial({vertexColors:true,roughness:.85,side:T.DoubleSide}));blanketMesh.castShadow=true;g.add(blanketMesh);
 g.scale.setScalar(.9);g.userData.kind='caravan';g.userData.legs=legs;g.userData.head=headG;g.userData.tail=tailG;return g;}
 const camelMatGlobal=creatureMat(.9,furTex('#7a5636',.16,1500));
-const camels=[];const blankets=['#a8442f','#2f5a8a','#b8862f','#6a3a8a'];
+const camels=[];const blankets=['#96543e','#4a6a80','#a8843a','#6a5478'];
 for(let i=0;i<4;i++){const c=makeCamel(blankets[i]);c.scale.multiplyScalar(range(1.0,1.15));scene.add(c);camels.push(c);animals.push(c);}
 const caraC=v(14,0,-20),caraR=14;
 // Lead ropes between consecutive camels, recomputed each frame with a natural sag.
@@ -261,7 +264,7 @@ const denMound=mesh(new T.SphereGeometry(1,10,6),mat('#c99a5f'),denC.clone().add
 const doveMat=creatureMat(.85,null,{side:T.DoubleSide});
 const D_PINK='#d9a58e',D_BELLY='#eed3b8',D_WING='#9aa7bf',D_WINGD='#6d7890',D_SPECK='#7a4a28',D_TAIL='#a08a78';
 function doveBody(perched){const parts=[
-{geo:new T.SphereGeometry(1,20,14),m:M4(0,0,0,.32,.145,.125),c:function(q,c){c.set(D_PINK).lerp(new T.Color(D_BELLY),T.MathUtils.clamp((-q.y)*6,0,1));if(q.y>.04)c.lerp(new T.Color(D_TAIL),T.MathUtils.clamp((-q.x)*2.2,0,.85));}},
+{geo:new T.SphereGeometry(1,20,14),m:M4(0,0,0,.30,.135,.112),c:function(q,c){c.set(D_PINK).lerp(new T.Color(D_BELLY),T.MathUtils.clamp((-q.y)*6,0,1));if(q.y>.04)c.lerp(new T.Color(D_TAIL),T.MathUtils.clamp((-q.x)*2.2,0,.85));}},
 {geo:paint(taperTube([v(.22,.03,0),v(.28,.10,0)],t=>.055-.012*t,8),(q,c)=>c.set(D_PINK)),m:M4(0,0,0),c:null},
 {geo:new T.SphereGeometry(1,12,9),m:M4(.285,.135,0,.088,.085,.08),c:D_PINK},
 {geo:new T.SphereGeometry(1,8,6),m:M4(.25,.085,0,.068,.055,.065),c:D_SPECK},
@@ -271,12 +274,12 @@ function doveBody(perched){const parts=[
 if(perched){parts.push({geo:new T.CylinderGeometry(.011,.009,.10,5),m:M4(.02,-.19,.035),c:'#b04838'},{geo:new T.CylinderGeometry(.011,.009,.10,5),m:M4(.02,-.19,-.035),c:'#b04838'},
 {geo:paint(taperTube([v(-.24,.02,0),v(-.46,.01,0)],t=>.04*(1-t*.5),6),(q,c)=>c.set(D_TAIL)),m:M4(0,0,0,.4,1,2.6),c:null});
 for(const sw of[-1,1]){for(let k=0;k<4;k++)parts.push({geo:featherGeo(.26-k*.012,.052),m:M4(.10-k*.045,.068+k*.006,sw*(.062+k*.034),1,1,1,sw*(.30+k*.10),-sw*(.16+k*.05),-.05),c:k>1?D_WINGD:(k?'#8fa0bb':D_WING)});
-for(let k=0;k<4;k++)parts.push({geo:featherGeo(.19-k*.012,.030),m:M4(-.14,.052+k*.004,sw*(.075-k*.026),1,1,1,sw*.18,-sw*(.34+k*.12),0),c:k>1?'#43506a':'#5d6a86'});}}
+for(let k=0;k<4;k++)parts.push({geo:featherGeo(.19-k*.012,.030),m:M4(-.15,.048+k*.004,sw*(.075-k*.026),1,1,1,sw*.06,-sw*(.30+k*.10),-.04),c:k>1?'#43506a':'#5d6a86'});}}
 else{for(let k=-2;k<=2;k++)parts.push({geo:featherGeo(.24,.048),m:M4(-.36,.012,k*.024,1,1,1,0,k*.13,0),c:(q2,c)=>{c.set(D_TAIL);if(q2.x<-.44)c.set('#463b2e');if(Math.abs(k)===2&&q2.x<-.50)c.set('#e8e0d0');}});}
 return mergeParts(parts);}
 function doveWing(side){const root=new T.Group();root.position.set(.03,.055,side*.10);
 const innerParts=[{geo:featherGeo(.24,.20),m:M4(.03,0,side*.03,1,1,1,0,-side*.10,0),c:(q,c)=>c.set(D_WING).lerp(new T.Color(D_WINGD),T.MathUtils.clamp(Math.abs(q.z)*1.2,0,.55))}];
-for(let k=0;k<5;k++)innerParts.push({geo:featherGeo(.19-k*.008,.042),m:M4(-.06-k*.014,.002,side*(.035+k*.030),1,1,1,0,-side*(.10+k*.05),0),c:k%2?D_WING:'#8fa0bb'});
+for(let k=0;k<5;k++)innerParts.push({geo:featherGeo(.19-k*.008,.042),m:M4(-.06-k*.014,.002,side*(.035+k*.030),1,1,1,0,-side*(.10+k*.05),0),c:k%2?D_WING:'#a8b6cc'});
 const inner=new T.Mesh(mergeParts(innerParts),doveMat);inner.castShadow=true;root.add(inner);
 const outerG=new T.Group();outerG.position.set(-.12,0,side*.155);root.add(outerG);
 const outerParts=[];
