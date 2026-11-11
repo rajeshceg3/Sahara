@@ -34,14 +34,16 @@ try{
  const cdp=await q.createCDPSession();
  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:hc.x,y:hc.y}]});
  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
- await new Promise(r=>setTimeout(r,450));
- assert.equal(await q.$eval('header',e=>getComputedStyle(e).visibility),'visible','hint woke the controls');
- assert.equal(await q.$eval('#pin',e=>e.getAttribute('aria-pressed')),'false');
+ await new Promise(r=>setTimeout(r,250));
+ // focus the pin at once: focus-within holds the woken chrome, so a slow
+ // software-rendered CI frame cannot race the 2.6s retire.
+ await q.evaluate(()=>document.querySelector('#pin').focus());
+ const st=await q.evaluate(()=>({ae:document.activeElement&&document.activeElement.id,vis:getComputedStyle(document.querySelector('header')).visibility,pr:document.querySelector('#pin').getAttribute('aria-pressed')}));
+ assert.equal(st.vis,'visible','hint woke the controls');
+ assert.equal(st.ae,'pin','pin focused');
+ assert.equal(st.pr,'false');
  // layout hit-test: the pin cairn really is the topmost target at its centre
  assert.ok(['svg','path','BUTTON'].includes(await q.evaluate(()=>{const b=document.querySelector('#pin');const r=b.getBoundingClientRect();const t=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return t?(t.id||t.tagName):'none'})),'pin is the hit target at its centre');
- await q.focus('#pin');
- if(await q.evaluate(()=>document.activeElement&&document.activeElement.id)!=='pin')await q.evaluate(()=>document.querySelector('#pin').focus());
- assert.equal(await q.evaluate(()=>document.activeElement&&document.activeElement.id),'pin','pin focused');
  await q.keyboard.press('Enter');await new Promise(r=>setTimeout(r,150));
  assert.equal(await q.$eval('#pin',e=>e.getAttribute('aria-pressed')),'true','pin toggled on');
  await new Promise(r=>setTimeout(r,3200));
