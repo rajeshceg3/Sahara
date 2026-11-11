@@ -22,7 +22,7 @@ dialog Escape, opt-in sound state, no horizontal overflow, 44px targets, 16px
 floor, close-up subject frames for camel, fennec, sandfish and dove at 390,
 reduced-motion emulation paused default with pixel-identical canvas over 700ms,
 no page errors. Scene-gate assertions passed at 320 and 390 in normal motion;
-1440 normal-motion and the reduced-motion matrix run in CI.
+1440 normal-motion (chapters split) and the full reduced-motion matrix at 320, 390 and 1440 also executed locally and passed.
 
 Two latent bugs found and fixed by this gate: the app's chapter scoping
 included `body` in its `[data-chapter]` selection (so `body` received
