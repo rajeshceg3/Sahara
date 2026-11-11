@@ -112,7 +112,9 @@ N.push(nrm.x*nx+bin.x*ny,nrm.y*nx+bin.y*ny,nrm.z*nx+bin.z*ny);}}
 for(let i=0;i<segs;i++)for(let s=0;s<sides;s++){const a=i*sides+s,b=i*sides+(s+1)%sides,c2=(i+1)*sides+s,d=(i+1)*sides+(s+1)%sides;I.push(a,c2,b,b,c2,d);}
 const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(new Float32Array(P),3));g.setAttribute('normal',new T.BufferAttribute(new Float32Array(N),3));g.setIndex(I);return g;}
 function furTex(streak,alpha=.12,strokes=1100){const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,128,128);x.strokeStyle=streak;x.lineWidth=.8;for(let i=0;i<strokes;i++){x.globalAlpha=alpha*(.4+Math.random());const px=Math.random()*128,py=Math.random()*128,l=2+Math.random()*4,a=Math.PI/2+(Math.random()-.5)*.8;x.beginPath();x.moveTo(px,py);x.lineTo(px+Math.cos(a)*l,py+Math.sin(a)*l);x.stroke();}const t=new T.CanvasTexture(cv);t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;return t;}
-const creatureMat=(rough=.9,map=null)=>new T.MeshStandardMaterial({vertexColors:true,map,roughness:rough});
+function featherGeo(len,wid){const s=new T.Shape();s.moveTo(len*.08,-wid*.30);s.quadraticCurveTo(-len*.30,-wid*.62,-len*.70,-wid*.46);s.quadraticCurveTo(-len*.96,-wid*.28,-len,0);s.quadraticCurveTo(-len*.96,wid*.28,-len*.70,wid*.46);s.quadraticCurveTo(-len*.30,wid*.62,len*.08,wid*.30);s.quadraticCurveTo(len*.16,0,len*.08,-wid*.30);const g=new T.ShapeGeometry(s,5);g.rotateX(-Math.PI/2);return g;}
+function strandTex(streak,alpha=.5,strokes=1500){const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,128,128);x.strokeStyle=streak;x.lineWidth=.9;for(let i=0;i<strokes;i++){x.globalAlpha=alpha*(.4+Math.random());const px=Math.random()*128,py=Math.random()*128,l=2.5+Math.random()*5,a=Math.PI/2+(Math.random()-.5)*.9;x.beginPath();x.moveTo(px,py);x.lineTo(px+Math.cos(a)*l,py+Math.sin(a)*l);x.stroke();}const t=new T.CanvasTexture(cv);t.wrapS=t.wrapT=T.RepeatWrapping;return t;}
+const creatureMat=(rough=.9,map=null,extra={})=>new T.MeshStandardMaterial(Object.assign({vertexColors:true,map,roughness:rough},extra));
 // Coat references: wild dromedary - tawny flank, darker woolly hump crest, pale legs and belly.
 const C_BACK='#9a6b3f',C_FLANK='#b08254',C_BELLY='#cfa773',C_LEG='#c19b6b',C_WOOL='#6e4a2a',C_MUZZLE='#6e4a2e',C_EYE='#241505',C_HI='#ffffff';
 function headCoat(q,c){c.set(C_FLANK);c.lerp(new T.Color(C_WOOL),T.MathUtils.clamp((q.y-.02)/.16,0,.8));c.lerp(new T.Color(C_MUZZLE),T.MathUtils.clamp((q.x-.18)/.15,0,1)*T.MathUtils.clamp((-q.y)/.1,0,1)*.6);}
@@ -139,7 +141,7 @@ const bodyMesh=new T.Mesh(body,camelMatGlobal);bodyMesh.castShadow=true;g.add(bo
 // Head: cranium, long downturned muzzle, split-lip shading, nostrils, lashed eyes, small ears, forelock.
 const headG=new T.Group();headG.position.set(1.47,2.20,0);
 const headGeo=mergeParts([
-{geo:new T.SphereGeometry(1,14,10),m:M4(.08,0,0,.20,.155,.135),c:headCoat},
+{geo:new T.SphereGeometry(1,20,15),m:M4(.08,0,0,.20,.155,.135),c:headCoat},
 {geo:paint(taperTube([v(.14,-.02,0),v(.37,-.05,0),v(.52,-.13,0)],t=>.082-.032*t,8),(q,c)=>{c.set(C_FLANK).lerp(new T.Color(C_MUZZLE),T.MathUtils.clamp((q.x-.30)/.18,0,1));}),m:M4(0,0,0),c:null},
 {geo:new T.SphereGeometry(1,8,6),m:M4(.28,-.125,0,.15,.055,.085),c:C_MUZZLE},
 {geo:new T.SphereGeometry(.014,6,5),m:M4(.50,-.09,.038),c:C_EYE},
@@ -219,8 +221,8 @@ const fennec=new T.Group();
 const F_BACK='#dcae72',F_CREAM='#f2e2c4',F_WHITE='#f8f0e0',F_PINK='#e8a58e',F_DARK='#2a1a10';
 const fenMat=creatureMat(.94,furTex('#b08248',.08,1300));
 const fenBody=mergeParts([
-{geo:new T.SphereGeometry(1,16,12),m:M4(-.05,.30,0,.30,.27,.24),c:function(q,c){c.set(F_BACK).lerp(new T.Color(F_CREAM),T.MathUtils.clamp((.30-q.y)*2.4,0,1));}},
-{geo:paint(taperTube([v(-.18,.36,0),v(.05,.42,0),v(.22,.50,0)],t=>.15-.03*t,10),(q,c)=>c.set(F_BACK).lerp(new T.Color(F_CREAM),T.MathUtils.clamp((.44-q.y)*3,0,.9))),m:M4(0,0,0),c:null},
+{geo:new T.SphereGeometry(1,24,18),m:M4(-.10,.25,0,.255,.21,.205),c:function(q,c){c.set(F_BACK).lerp(new T.Color(F_CREAM),T.MathUtils.clamp((.26-q.y)*2.4,0,1));}},
+{geo:paint(taperTube([v(-.20,.33,0),v(.04,.40,0),v(.24,.50,0)],t=>.175-.035*t,10),(q,c)=>c.set(F_BACK).lerp(new T.Color(F_CREAM),T.MathUtils.clamp((.44-q.y)*3,0,.9))),m:M4(0,0,0),c:null},
 {geo:new T.SphereGeometry(1,12,9),m:M4(.22,.42,0,.17,.19,.15),c:F_CREAM},
 {geo:new T.SphereGeometry(1,10,7),m:M4(-.04,.045,.14,.13,.04,.055),c:F_CREAM},
 {geo:new T.SphereGeometry(1,10,7),m:M4(-.04,.045,-.14,.13,.04,.055),c:F_CREAM},
@@ -229,23 +231,26 @@ const fenBody=mergeParts([
 {geo:new T.SphereGeometry(1,7,5),m:M4(.27,.06,.088,.05,.03,.042),c:F_WHITE},
 {geo:new T.SphereGeometry(1,7,5),m:M4(.27,.06,-.088,.05,.03,.042),c:F_WHITE}]);
 const fenBodyMesh=new T.Mesh(fenBody,fenMat);fenBodyMesh.castShadow=true;fennec.add(fenBodyMesh);
+const fenShellMat=new T.MeshStandardMaterial({color:'#dfc290',roughness:1,alphaMap:strandTex('#c8c8c8',.5,1700),transparent:true,alphaTest:.42,depthWrite:false});
+const fenShell=new T.Mesh(fenBody,fenShellMat);fenShell.scale.setScalar(1.035);fenShell.castShadow=false;fennec.add(fenShell);
 // Bushy curled tail with dark tip.
 const fenTail=mergeParts([
 {geo:paint(taperTube([v(-.26,.14,0),v(-.42,.08,.12),v(-.30,.06,.28),v(-.02,.07,.32)],t=>.05+.035*Math.sin(Math.PI*t),9),(q,c)=>c.set(F_BACK).lerp(new T.Color(F_CREAM),.35)),m:M4(0,0,0),c:null},
 {geo:paint(taperTube([v(-.02,.07,.32),v(.08,.09,.30)],t=>.055*(1-t*.4),8),(q,c)=>c.set('#6a4a34')),m:M4(0,0,0),c:null}]);
 const fenTailMesh=new T.Mesh(fenTail,fenMat);fenTailMesh.castShadow=true;fennec.add(fenTailMesh);
+const fenTailShell=new T.Mesh(fenTail,fenShellMat);fenTailShell.scale.setScalar(1.05);fenTailShell.castShadow=false;fennec.add(fenTailShell);
 const fenHead=new T.Group();fenHead.position.set(.30,.64,0);
 const fenHeadGeo=mergeParts([
-{geo:new T.SphereGeometry(1,14,10),m:M4(0,0,0,.115,.105,.095),c:function(q,c){c.set(F_BACK).lerp(new T.Color(F_CREAM),T.MathUtils.clamp((-q.y+.02)*6,0,.8));}},
+{geo:new T.SphereGeometry(1,20,15),m:M4(0,0,0,.115,.105,.095),c:function(q,c){c.set(F_BACK).lerp(new T.Color(F_CREAM),T.MathUtils.clamp((-q.y+.02)*6,0,.8));}},
 {geo:new T.SphereGeometry(1,10,7),m:M4(.10,-.032,0,.068,.045,.045),c:F_WHITE},
-{geo:new T.SphereGeometry(.013,6,5),m:M4(.152,-.018,0),c:F_DARK},
+{geo:new T.SphereGeometry(.013,6,5),m:M4(.152,-.018,0),c:'#120a06'},
 {geo:new T.SphereGeometry(1,8,6),m:M4(.085,-.05,.042,.035,.026,.03),c:F_WHITE},
 {geo:new T.SphereGeometry(1,8,6),m:M4(.085,-.05,-.042,.035,.026,.03),c:F_WHITE}]);
 const fenHeadMesh=new T.Mesh(fenHeadGeo,fenMat);fenHeadMesh.castShadow=true;fenHead.add(fenHeadMesh);
 const fenEyes=[];for(const s of[-1,1]){const e=mesh(new T.SphereGeometry(.025,8,6),eyeMat,v(.072,.035,s*.076),v(1,1,1),fenHead);paint(e.geometry,(q,c)=>c.set(F_DARK));const hi=mesh(new T.SphereGeometry(.008,5,4),new T.MeshBasicMaterial({color:0xfff4e0}),v(.083,.045,s*.085),v(1,1,1),fenHead);hi.castShadow=false;fenEyes.push(e);}
 function fenEar(side){const earG=new T.Group();earG.position.set(-.04,.10,side*.052);
-const outer=mesh(new T.ConeGeometry(.10,.38,8),fenMat,v(0,.17,0),v(1,1,.34),earG);paint(outer.geometry,(q,c)=>c.set(F_BACK).lerp(new T.Color(F_CREAM),T.MathUtils.clamp((.12-q.y)*1.4,0,.7)));
-const inner=mesh(new T.ConeGeometry(.075,.30,7),creatureMat(.8),v(.040,.14,0),v(1,1,.26),earG);paint(inner.geometry,(q,c)=>c.set(F_PINK).lerp(new T.Color(F_WHITE),T.MathUtils.clamp((q.y)*2,0,.5)));
+const outer=mesh(new T.ConeGeometry(.078,.42,10),fenMat,v(0,.18,0),v(1,1,.52),earG);paint(outer.geometry,(q,c)=>c.set(F_BACK).lerp(new T.Color(F_CREAM),T.MathUtils.clamp((.12-q.y)*1.4,0,.7)));
+const inner=mesh(new T.ConeGeometry(.058,.34,8),creatureMat(.55,null,{emissive:'#b04a34',emissiveIntensity:.13}),v(.034,.15,0),v(1,1,.42),earG);paint(inner.geometry,(q,c)=>c.set(F_PINK).lerp(new T.Color(F_WHITE),T.MathUtils.clamp((q.y)*2,0,.5)));
 earG.rotation.x=side*.40;earG.rotation.z=-.30;fenHead.add(earG);return earG;}
 const earL=fenEar(1),earR=fenEar(-1);
 fennec.add(fenHead);
@@ -253,23 +258,30 @@ fennec.userData.kind='fennec';fennec.userData.head=fenHead;fennec.userData.earL=
 const denC=v(-27,0,50);denC.y=dune(denC.x,denC.z);fennec.scale.setScalar(1.5);fennec.position.copy(denC).add(v(2.6,.02,1.8));scene.add(fennec);animals.push(fennec);
 const denMound=mesh(new T.SphereGeometry(1,10,6),mat('#c99a5f'),denC.clone().add(v(0,-.6,0)),v(1.7,.85,1.6),scene);denMound.castShadow=false;
 // Laughing doves: pink-fawn breast, speckled copper foreneck, blue-grey wings, white-tipped tail fan.
-const doveMat=creatureMat(.85);
+const doveMat=creatureMat(.85,null,{side:T.DoubleSide});
 const D_PINK='#d9a58e',D_BELLY='#eed3b8',D_WING='#9aa7bf',D_WINGD='#6d7890',D_SPECK='#7a4a28',D_TAIL='#a08a78';
 function doveBody(perched){const parts=[
-{geo:new T.SphereGeometry(1,14,10),m:M4(0,0,0,.32,.145,.125),c:function(q,c){c.set(D_PINK).lerp(new T.Color(D_BELLY),T.MathUtils.clamp((-q.y)*6,0,1));if(q.y>.04)c.lerp(new T.Color(D_TAIL),T.MathUtils.clamp((-q.x)*2.2,0,.85));}},
-{geo:new T.SphereGeometry(1,12,9),m:M4(.27,.085,0,.095,.09,.085),c:D_PINK},
-{geo:new T.SphereGeometry(1,8,6),m:M4(.235,.045,0,.075,.06,.07),c:D_SPECK},
-{geo:new T.ConeGeometry(.016,.055,6),m:M4(.365,.075,0,1,1,1,0,0,-1.65),c:'#1c1210'},
-{geo:new T.SphereGeometry(.02,6,5),m:M4(.29,.115,.058),c:'#1c1210'},
-{geo:new T.SphereGeometry(.02,6,5),m:M4(.29,.115,-.058),c:'#1c1210'}];
+{geo:new T.SphereGeometry(1,20,14),m:M4(0,0,0,.32,.145,.125),c:function(q,c){c.set(D_PINK).lerp(new T.Color(D_BELLY),T.MathUtils.clamp((-q.y)*6,0,1));if(q.y>.04)c.lerp(new T.Color(D_TAIL),T.MathUtils.clamp((-q.x)*2.2,0,.85));}},
+{geo:paint(taperTube([v(.22,.03,0),v(.28,.10,0)],t=>.055-.012*t,8),(q,c)=>c.set(D_PINK)),m:M4(0,0,0),c:null},
+{geo:new T.SphereGeometry(1,12,9),m:M4(.285,.135,0,.088,.085,.08),c:D_PINK},
+{geo:new T.SphereGeometry(1,8,6),m:M4(.25,.085,0,.068,.055,.065),c:D_SPECK},
+{geo:new T.ConeGeometry(.016,.055,6),m:M4(.375,.125,0,1,1,1,0,0,-1.65),c:'#1c1210'},
+{geo:new T.SphereGeometry(.02,6,5),m:M4(.305,.165,.055),c:'#1c1210'},
+{geo:new T.SphereGeometry(.02,6,5),m:M4(.305,.165,-.055),c:'#1c1210'}];
 if(perched){parts.push({geo:new T.CylinderGeometry(.011,.009,.10,5),m:M4(.02,-.19,.035),c:'#b04838'},{geo:new T.CylinderGeometry(.011,.009,.10,5),m:M4(.02,-.19,-.035),c:'#b04838'},
-{geo:paint(taperTube([v(-.24,.02,0),v(-.46,.01,0)],t=>.04*(1-t*.5),6),(q,c)=>c.set(D_TAIL)),m:M4(0,0,0,.4,1,2.6),c:null});}
-else{for(let k=-2;k<=2;k++)parts.push({geo:new T.BoxGeometry(.22,.007,.042),m:M4(-.38,.012,k*.034,1,1,1,0,k*.10,0),c:(q2,c)=>{c.set(D_TAIL);if(q2.x<-.42)c.set('#463b2e');if(Math.abs(k)===2&&q2.x<-.46)c.set('#e8e0d0');}});}
+{geo:paint(taperTube([v(-.24,.02,0),v(-.46,.01,0)],t=>.04*(1-t*.5),6),(q,c)=>c.set(D_TAIL)),m:M4(0,0,0,.4,1,2.6),c:null});
+for(const sw of[-1,1]){for(let k=0;k<4;k++)parts.push({geo:featherGeo(.26-k*.012,.052),m:M4(.10-k*.045,.068+k*.006,sw*(.062+k*.034),1,1,1,sw*(.30+k*.10),-sw*(.16+k*.05),-.05),c:k>1?D_WINGD:(k?'#8fa0bb':D_WING)});
+for(let k=0;k<4;k++)parts.push({geo:featherGeo(.19-k*.012,.030),m:M4(-.14,.052+k*.004,sw*(.075-k*.026),1,1,1,sw*.18,-sw*(.34+k*.12),0),c:k>1?'#43506a':'#5d6a86'});}}
+else{for(let k=-2;k<=2;k++)parts.push({geo:featherGeo(.24,.048),m:M4(-.36,.012,k*.024,1,1,1,0,k*.13,0),c:(q2,c)=>{c.set(D_TAIL);if(q2.x<-.44)c.set('#463b2e');if(Math.abs(k)===2&&q2.x<-.50)c.set('#e8e0d0');}});}
 return mergeParts(parts);}
 function doveWing(side){const root=new T.Group();root.position.set(.03,.055,side*.10);
-const inner=mesh(new T.BoxGeometry(.26,.012,.18),doveMat,v(-.06,0,side*.085),v(1,1,1),root);inner.rotation.y=-side*.35;paint(inner.geometry,(q,c)=>c.set(D_WING).lerp(new T.Color(D_WINGD),T.MathUtils.clamp((Math.abs(q.z)-.02)*4,0,.6)));
-const outerG=new T.Group();outerG.position.set(-.10,0,side*.17);root.add(outerG);
-for(let k=0;k<5;k++){const f=mesh(new T.BoxGeometry(.21-k*.015,.009,.034),doveMat,v(-.08-k*.022,0,side*(.010+k*.028)),v(1,1,1),outerG);paint(f.geometry,(q,c)=>c.set(k>2?'#4d5870':D_WING));f.rotation.y=-side*k*.06;}
+const innerParts=[{geo:featherGeo(.24,.20),m:M4(.03,0,side*.03,1,1,1,0,-side*.10,0),c:(q,c)=>c.set(D_WING).lerp(new T.Color(D_WINGD),T.MathUtils.clamp(Math.abs(q.z)*1.2,0,.55))}];
+for(let k=0;k<5;k++)innerParts.push({geo:featherGeo(.19-k*.008,.042),m:M4(-.06-k*.014,.002,side*(.035+k*.030),1,1,1,0,-side*(.10+k*.05),0),c:k%2?D_WING:'#8fa0bb'});
+const inner=new T.Mesh(mergeParts(innerParts),doveMat);inner.castShadow=true;root.add(inner);
+const outerG=new T.Group();outerG.position.set(-.12,0,side*.155);root.add(outerG);
+const outerParts=[];
+for(let k=0;k<7;k++)outerParts.push({geo:featherGeo(.235-k*.014,.040),m:M4(-k*.018,0,side*(.004+k*.023),1,1,1,0,-side*(.14+k*.085),0),c:k>3?'#43506a':k>1?'#5d6a86':D_WING});
+const outer=new T.Mesh(mergeParts(outerParts),doveMat);outer.castShadow=true;outerG.add(outer);
 root.userData.outer=outerG;return root;}
 const doves=[];for(let i=0;i<5;i++){const d=new T.Group();const body=new T.Mesh(doveBody(false),doveMat);body.castShadow=true;d.add(body);
 const wl=doveWing(1),wr=doveWing(-1);d.add(wl);d.add(wr);d.userData.kind='dove';d.userData.wingL=wl;d.userData.wingR=wr;scene.add(d);doves.push(d);animals.push(d);}
@@ -312,9 +324,10 @@ addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updat
 const look=v(0,0,0),bg=new T.Color(),sunPos=v(0,0,0),skyTopC=new T.Color(),skyHorC=new T.Color(),sunColC=new T.Color(),glowC=new T.Color('#ffb36b');
 function animate(now){requestAnimationFrame(animate);if(document.hidden)return;const dt=Math.min((now-last)/1000,.15);last=now;if(!paused&&!encountered)elapsed+=dt;const c=chapters[chapter];
 const watching=frameKind||(encountered?focusKind:null);
-const watchAnimal=watching==='caravan'||watching==='camel'?camels[1]:watching==='sandfish'?skink:watching==='fennec'?fennec:watching==='dove'?doves[0]:null;
-if(watchAnimal){const ap=watchAnimal.position,lift=watching==='fennec'?.55:watching==='sandfish'?.3:watching==='dove'?.2:2.0,dist=watching==='caravan'||watching==='camel'?11:watching==='fennec'?3.4:watching==='sandfish'?2.4:3.6,ry=watchAnimal.rotation.y;
-focusV.set(ap.x+Math.sin(ry+2.5)*dist,ap.y+lift+dist*.28,ap.z+Math.cos(ry+2.5)*dist);
+const watchAnimal=watching==='caravan'||watching==='camel'?camels[1]:watching==='sandfish'?skink:watching==='fennec'?fennec:watching==='dove'?perchedDoves[0]:null;
+if(watchAnimal){const ap=watchAnimal.position,lift=watching==='fennec'?.55:watching==='sandfish'?.3:watching==='dove'?.2:2.0,dist=watching==='caravan'||watching==='camel'?11:watching==='fennec'?3.4:watching==='sandfish'?2.4:1.9,ry=watchAnimal.rotation.y;
+const orbit=watching==='dove'?.3:(watching==='caravan'||watching==='camel')?.5:2.5;
+focusV.set(ap.x+Math.sin(ry+orbit)*dist,ap.y+lift+dist*.28,ap.z+Math.cos(ry+orbit)*dist);
 if(frameKind||matchMedia('(prefers-reduced-motion: reduce)').matches)camera.position.copy(focusV);else camera.position.lerp(focusV,1-Math.exp(-dt*4));
 focusV.set(ap.x,ap.y+lift,ap.z).sub(camera.position);targetYaw=Math.atan2(focusV.x,focusV.z);targetPitch=Math.atan2(focusV.y,Math.hypot(focusV.x,focusV.z));
 if(frameKind){yaw=targetYaw;pitch=targetPitch;}}
