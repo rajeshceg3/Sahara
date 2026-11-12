@@ -6,8 +6,8 @@ let renderer;try{renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:false
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
 const scene=new T.Scene(), camera=new T.PerspectiveCamera(62,innerWidth/innerHeight,.12,1600);scene.background=new T.Color('#e9b98c');scene.fog=new T.FogExp2('#ecc39a',.0016);
-const hemi=new T.HemisphereLight(0xffe2c4,0x7a5238,1.5);scene.add(hemi);
-const sunlight=new T.DirectionalLight(0xffc08a,2.4);sunlight.castShadow=true;sunlight.shadow.mapSize.set(1024,1024);
+const hemi=new T.HemisphereLight(0xffe2c4,0x7a5238,1.7);scene.add(hemi);
+const sunlight=new T.DirectionalLight(0xffc08a,2.6);sunlight.castShadow=true;sunlight.shadow.mapSize.set(1024,1024);
 Object.assign(sunlight.shadow.camera,{left:-60,right:60,top:60,bottom:-60,near:1,far:500});sunlight.shadow.bias=-0.0006;sunlight.shadow.normalBias=.4;
 scene.add(sunlight);scene.add(sunlight.target);
 let seed=311;const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646},range=(a,b)=>a+(b-a)*rand();
@@ -286,19 +286,29 @@ const denC=v(-27,0,50);denC.y=dune(denC.x,denC.z);fennec.scale.setScalar(1.5);fe
 const denMound=mesh(new T.SphereGeometry(1,10,6),mat('#c99a5f'),denC.clone().add(v(0,-.6,0)),v(1.7,.85,1.6),scene);denMound.castShadow=false;
 // Laughing doves: pink-fawn breast, speckled copper foreneck, blue-grey wings, white-tipped tail fan.
 const doveMat=creatureMat(.85,null,{side:T.DoubleSide,bumpMap:barbBumpTex(),bumpScale:.22,rim:.22});
-const D_PINK='#d9a58e',D_BELLY='#eed3b8',D_WING='#9aa7bf',D_WINGD='#6d7890',D_SPECK='#7a4a28',D_TAIL='#a08a78';
+const D_PINK='#d9a58e',D_BELLY='#eed3b8',D_WING='#8b99b6',D_WINGD='#5a657f',D_SPECK='#7a4a28',D_TAIL='#9a8472';
 function doveBody(perched){const parts=[
 {geo:new T.SphereGeometry(1,20,14),m:M4(0,0,0,.30,.135,.112),c:function(q,c){c.set(D_PINK).lerp(new T.Color(D_BELLY),T.MathUtils.clamp((-q.y)*6,0,1));if(q.y>.04)c.lerp(new T.Color(D_TAIL),T.MathUtils.clamp((-q.x)*2.2,0,.85));}},
 {geo:paint(taperTube([v(.22,.03,0),v(.28,.10,0)],t=>.055-.012*t,8),(q,c)=>c.set(D_PINK)),m:M4(0,0,0),c:null},
-{geo:new T.SphereGeometry(1,12,9),m:M4(.285,.135,0,.088,.085,.08),c:D_PINK},
-{geo:new T.SphereGeometry(1,8,6),m:M4(.25,.085,0,.068,.055,.065),c:D_SPECK},
+{geo:paint(new T.SphereGeometry(1,12,9),(q,c)=>{c.set(D_PINK);if(q.y>.03)c.lerp(new T.Color('#9aa8bc'),T.MathUtils.clamp((q.y-.03)*9,0,.7));}),m:M4(.285,.135,0,.088,.085,.08),c:null},
+{geo:paint(new T.SphereGeometry(1,10,8),(q,c)=>{c.set('#b0764a');const d=Math.sin(q.x*34+q.z*21)*Math.sin(q.y*42-q.z*29);if(d>.05)c.lerp(new T.Color('#3c2210'),.9);}),m:M4(.25,.085,0,.068,.055,.065),c:null},
 {geo:new T.ConeGeometry(.016,.055,6),m:M4(.375,.125,0,1,1,1,0,0,-1.65),c:'#1c1210'},
 {geo:new T.SphereGeometry(.02,6,5),m:M4(.305,.165,.055),c:'#1c1210'},
 {geo:new T.SphereGeometry(.02,6,5),m:M4(.305,.165,-.055),c:'#1c1210'}];
-if(perched){parts.push({geo:new T.CylinderGeometry(.011,.009,.10,5),m:M4(.02,-.19,.035),c:'#b04838'},{geo:new T.CylinderGeometry(.011,.009,.10,5),m:M4(.02,-.19,-.035),c:'#b04838'},
-{geo:paint(taperTube([v(-.24,.02,0),v(-.46,.01,0)],t=>.04*(1-t*.5),6),(q,c)=>c.set(D_TAIL)),m:M4(0,0,0,.4,1,2.6),c:null});
-for(const sw of[-1,1]){for(let k=0;k<4;k++)parts.push({geo:featherGeo(.26-k*.012,.058),m:M4(.10-k*.045,.042+k*.004,sw*(.045+k*.024),1,1,1,sw*(.08+k*.04),-sw*(.16+k*.05),-.05),c:k>1?D_WINGD:(k?'#8fa0bb':D_WING)});
-for(let k=0;k<4;k++)parts.push({geo:featherGeo(.19-k*.012,.034),m:M4(-.15,.030+k*.003,sw*(.060-k*.020),1,1,1,sw*.04,-sw*(.22+k*.08),-.04),c:k>1?'#43506a':'#5d6a86'});}}
+if(perched){
+ // Short dark-red legs with real toes, set under the breast.
+ for(const sw of[-1,1]){parts.push({geo:new T.CylinderGeometry(.009,.007,.075,5),m:M4(.05,-.165,sw*.032),c:'#8a3a2c'});
+ for(let toe=-1;toe<=1;toe++)parts.push({geo:new T.CylinderGeometry(.0026,.002,.034,4),m:M4(.064,-.2,sw*.032+toe*.008,1,1,1,0,toe*.3,1.45),c:'#8a3a2c'});}
+ // Graduated tail fan: five feathers, dark subterminal band, white-tipped outer pair.
+ for(let k=-2;k<=2;k++)parts.push({geo:paint(featherGeo(.25-Math.abs(k)*.02,.044),(q,c)=>{c.set(D_TAIL);if(Math.abs(k)===2&&q.x<-.205)c.set('#e8e0d0');else if(q.x<-.18)c.lerp(new T.Color('#463b2e'),.55);}),m:M4(-.14,.005,k*.017,1,1,1,0,k*.14,.06),c:null});
+ for(const sw of[-1,1]){
+ // Folded flight feathers along the flank, dark-tipped like a real closed wing.
+ for(let k=0;k<4;k++)parts.push({geo:paint(featherGeo(.26-k*.012,.058),(q,c)=>{c.set(k>1?D_WINGD:(k?'#8fa0bb':D_WING));if(q.x<-.20)c.lerp(new T.Color('#39425a'),.7);}),m:M4(.10-k*.045,.042+k*.004,sw*(.045+k*.024),1,1,1,sw*(.08+k*.04),-sw*(.16+k*.05),-.05),c:null});
+ // Two rows of scapular and covert feathers overlapping on top, pale with dark edges.
+ for(let row=0;row<2;row++)for(let j=0;j<5;j++)parts.push({geo:paint(featherGeo(.13-row*.02,.036),(q,c)=>{c.set(j%2?'#a8b6cc':'#8fa0bb');if(Math.abs(q.z)>.013)c.lerp(new T.Color('#3c465e'),.55);}),m:M4(.10-j*.05-row*.01,.058+row*.012,sw*(.052+row*.022),1,1,1,sw*.10,-sw*(.10+row*.06),-.04),c:null});
+ // Tertials stepping down over the rump.
+ for(let k=0;k<3;k++)parts.push({geo:featherGeo(.17-k*.014,.030),m:M4(-.13-k*.03,.036,sw*(.045-k*.012),1,1,1,sw*.05,-sw*(.20+k*.06),-.03),c:k>1?'#43506a':'#5d6a86'});
+ }}
 else{for(let k=-2;k<=2;k++)parts.push({geo:featherGeo(.24,.048),m:M4(-.36,.012,k*.024,1,1,1,0,k*.13,0),c:(q2,c)=>{c.set(D_TAIL);if(q2.x<-.44)c.set('#463b2e');if(Math.abs(k)===2&&q2.x<-.50)c.set('#e8e0d0');}});}
 return mergeParts(parts);}
 function doveWing(side){const root=new T.Group();root.position.set(.03,.055,side*.10);
@@ -314,13 +324,13 @@ const doves=[];for(let i=0;i<5;i++){const d=new T.Group();const body=new T.Mesh(
 const wl=doveWing(1),wr=doveWing(-1);d.add(wl);d.add(wr);d.userData.kind='dove';d.userData.wingL=wl;d.userData.wingR=wr;scene.add(d);doves.push(d);animals.push(d);}
 // A resident pair feeding and drinking at the pool edge.
 const perchedDoves=[];for(let i=0;i<2;i++){const d=new T.Group();const body=new T.Mesh(doveBody(true),doveMat);body.castShadow=true;d.add(body);
-d.userData.kind='dove';const a=1.1+i*1.9;d.position.set(oasisC.x+Math.sin(a)*10.4,0,oasisC.z+Math.cos(a)*10.4);d.position.y=Math.max(dune(d.position.x,d.position.z)+.26,oasisC.y+.5);d.rotation.y=a+Math.PI/2+i*.8;scene.add(d);perchedDoves.push(d);animals.push(d);}
+d.userData.kind='dove';const a=1.1+i*1.9;d.position.set(oasisC.x+Math.sin(a)*10.4,0,oasisC.z+Math.cos(a)*10.4);d.position.y=Math.max(dune(d.position.x,d.position.z)+.215,oasisC.y+.5);d.rotation.y=a+Math.PI/2+i*.8;scene.add(d);perchedDoves.push(d);animals.push(d);}
 // --- Round 2c: more Sahara wildlife, each built against reference photos ---
 // Horned viper: ambush coil in the white-hour dunes, horns over the eyes.
-const V_SAND='#d4b47c',V_BAND='#a8804a',V_BELLY='#ecd9ac';
+const V_SAND='#d4b47c',V_BAND='#96703c',V_BELLY='#ecd9ac';
 const viper=new T.Group();
 const viperCoil=mergeParts([
-{geo:paint(taperTube([v(-.19,.035,.03),v(-.03,.035,.15),v(.16,.035,.08),v(.13,.035,-.07),v(-.04,.035,-.12),v(-.15,.035,-.03)],t=>.045-.012*t,9,{flat:true}),(q,c)=>{c.set(V_SAND);const bl=Math.sin(q.x*55+.7)*Math.sin(q.z*48-.3)+.35*Math.sin(q.x*97+q.z*83);if(bl>.12)c.lerp(new T.Color(V_BAND),T.MathUtils.clamp(bl*.95,0,.78));c.lerp(new T.Color(V_BELLY),T.MathUtils.clamp((.03-q.y)*12,0,.35));}),m:M4(0,0,0),c:null},
+{geo:paint(taperTube([v(-.19,.035,.03),v(-.03,.035,.15),v(.16,.035,.08),v(.13,.035,-.07),v(-.04,.035,-.12),v(-.15,.035,-.03)],t=>.045-.012*t,9,{flat:true}),(q,c)=>{c.set(V_SAND);const bl=Math.sin(q.x*55+.7)*Math.sin(q.z*48-.3)+.35*Math.sin(q.x*97+q.z*83);if(bl>.02)c.lerp(new T.Color(V_BAND),T.MathUtils.clamp(bl*.95,0,.92));c.lerp(new T.Color(V_BELLY),T.MathUtils.clamp((.03-q.y)*12,0,.35));}),m:M4(0,0,0),c:null},
 {geo:paint(taperTube([v(.14,.045,.08),v(.28,.10,.13),v(.38,.20,.16)],t=>.048-.012*t,9),(q,c)=>c.set(V_SAND).lerp(new T.Color(V_BAND),.12)),m:M4(0,0,0),c:null}]);
 const viperMat=creatureMat(.72,null,{bumpMap:scaleBumpTex(),bumpScale:.6,rim:.04,rimColor:'#ffe8c4'});
 const viperCoilMesh=new T.Mesh(viperCoil,viperMat);viperCoilMesh.castShadow=true;viper.add(viperCoilMesh);
@@ -336,7 +346,7 @@ const viperTongue=new T.Group();viperTongue.position.set(.105,.005,0);
 for(const s of[-1,1]){const tn=mesh(new T.ConeGeometry(.003,.05,4),creatureMat(.6),v(.022,0,s*.007),v(1,1,1),viperTongue);paint(tn.geometry,(q,c)=>c.set('#3a1c14'));tn.rotation.z=-Math.PI/2;tn.rotation.y=-s*.3;}
 viperTongue.scale.setScalar(.01);viperHead.add(viperTongue);viper.add(viperHead);
 viper.userData.kind='viper';viper.userData.head=viperHead;viper.userData.tongue=viperTongue;
-const viperC=v(-6,0,42);viperC.y=dune(viperC.x,viperC.z);viper.position.copy(viperC).add(v(0,-.015,0));viper.rotation.y=1.35;scene.add(viper);animals.push(viper);
+const viperC=v(-6,0,42);viperC.y=dune(viperC.x,viperC.z);viper.scale.setScalar(1.18);viper.position.copy(viperC).add(v(0,-.015,0));viper.rotation.y=1.35;scene.add(viper);animals.push(viper);
 // Sandgrouse: a dawn pair at the pool edge, plump and small-headed.
 const G_BACK='#c8a878',G_BELLY='#e8d8b4',G_CHEST='#8a4a28',G_HEAD='#dcc9a0';
 function makeGrouse(){const g=new T.Group();
@@ -388,7 +398,7 @@ for(const s of[-1,1])agamaParts.push(
 const agamaMesh=new T.Mesh(mergeParts(agamaParts),creatureMat(.85,null,{rim:.08}));agamaMesh.castShadow=true;
 const agama=new T.Group();agama.add(agamaMesh);agama.position.set(agamaC.x,agamaC.y+.09,agamaC.z);agama.rotation.y=2.4;agama.userData.kind='agama';scene.add(agama);animals.push(agama);
 const chapters=[
-{title:'First light.<br><i>Long shadows.</i>',line:"The dunes hold the night's cold a little longer.",action:'Walk with the caravan',pos:v(-3,0,10),yaw:2.40,pitch:-.04,skyTop:'#8fb4d6',skyHor:'#f7c489',fog:.0016,ink:'#4a2f14',veil:['#3a240c30','#2a1a08e0','#22150af7'],sun:v(.92,.14,.22),sunColor:'#ffc08a',sunI:2.4,hemiI:1.5,glowAmt:1.1,kind:'caravan',wind:.5},
+{title:'First light.<br><i>Long shadows.</i>',line:"The dunes hold the night's cold a little longer.",action:'Walk with the caravan',pos:v(-3,0,10),yaw:2.40,pitch:-.04,skyTop:'#8fb4d6',skyHor:'#f7c489',fog:.0016,ink:'#4a2f14',veil:['#3a240c30','#2a1a08e0','#22150af7'],sun:v(.92,.14,.22),sunColor:'#ffc08a',sunI:2.6,hemiI:1.7,glowAmt:1.1,kind:'caravan',wind:.5},
 {title:'The white<br><i>hour.</i>',line:'Light everywhere. Even shadows hide.',action:'Read the wind',pos:v(-2,0,34),yaw:Math.PI,pitch:.1,skyTop:'#a8cfe8',skyHor:'#f4e3c0',fog:.0040,ink:'#4a2f14',veil:['#5a3c1440','#3a240cd8','#2a1a08ee'],sun:v(.15,.95,-.2),sunColor:'#fff4e0',sunI:3.2,hemiI:2.2,glowAmt:.5,kind:'wind',wind:1.6},
 {title:'A ring<br><i>of green.</i>',line:'Deep water, rising where the land dips low.',action:'Watch for the sandfish',pos:v(43,0,24),yaw:.695,pitch:-.16,skyTop:'#9cc4e0',skyHor:'#e8ddb0',fog:.0020,ink:'#3f2c12',veil:['#2c2c1030','#22301cd8','#1a2410ee'],sun:v(-.6,.5,.3),sunColor:'#ffe6c0',sunI:2.4,hemiI:1.9,glowAmt:.7,kind:'sandfish',wind:.6},
 {title:'The river<br><i>of stars.</i>',line:'The cold returns. The sky fills.',action:'Meet the fennec',pos:v(-17,0,36),yaw:-.44,pitch:-.08,skyTop:'#060b1c',skyHor:'#16233f',fog:.0009,ink:'#f3ead9',veil:['#04081440','#060a1ae0','#04060ef7'],sun:v(-.4,.72,-.5),sunColor:'#a8bcf0',sunI:1.15,hemiI:1.0,glowAmt:.35,kind:'fennec',wind:.3}];
@@ -421,6 +431,13 @@ document.addEventListener('visibilitychange',()=>{last=performance.now();soundsc
 window.__soundscape=soundscape;
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 const look=v(0,0,0),bg=new T.Color(),sunPos=v(0,0,0),skyTopC=new T.Color(),skyHorC=new T.Color(),sunColC=new T.Color(),glowC=new T.Color('#ffb36b');
+// Round 5: species-true behaviour cycles. Every pose is a pure function of
+// elapsed, so pause and reduced-motion still freeze everything deterministically.
+const smoothU=t=>t*t*(3-2*t);
+function seq(t,durs){let tot=0;for(const d of durs)tot+=d;let u=((t%tot)+tot)%tot;for(let i=0;i<durs.length;i++){if(u<durs[i])return[i,u/durs[i]];u-=durs[i];}return[durs.length-1,1];}
+const easeU=u=>smoothU(Math.min(1,Math.max(0,u)));
+// attack-hold-release envelope over a phase's local 0..1
+const ahr=(u,a,r)=>u<a?easeU(u/a):u>1-r?easeU((1-u)/r):1;
 function animate(now){requestAnimationFrame(animate);if(document.hidden)return;const dt=Math.min((now-last)/1000,.15);last=now;if(!paused&&!encountered)elapsed+=dt;const c=chapters[chapter];
 const watching=frameKind||(encountered?focusKind:null);
 const watchAnimal=watching==='caravan'||watching==='camel'?camels[1]:watching==='sandfish'?skink:watching==='fennec'?fennec:watching==='dove'?perchedDoves[0]:watching==='viper'?viper:watching==='sandgrouse'?grouse[0]:watching==='scarab'?scarab:watching==='agama'?agama:null;
@@ -463,13 +480,23 @@ wake.position.set(sx2-Math.cos(skink.rotation.y)*.4,dune(sx2,sz2)+.05,sz2+Math.s
 wake.scale.set(1.05*(1-crest*.4),.10*(1-crest*.6)+.03,.32*(1-crest*.25));
 if(elapsed-(trail.t||0)>.5){trail.t=elapsed;const t=trail.shift();trail.push(t);t.position.set(sx2,dune(sx2,sz2)+.03,sz2);t.userData.born=elapsed;}
 for(const t of trail){const age=elapsed-(t.userData.born||0);const s2=Math.max(.001,1-age*.4);t.scale.set(1.1*s2,.085*s2,.3*s2);}}
-{const fe=fennec.userData;fennec.position.y=denC.y+.02+Math.sin(elapsed*1.3)*.008;
-fennec.rotation.y=Math.sin(elapsed*.23)*.5+2.2;
-fe.earL.rotation.z=-.12+Math.sin(elapsed*2.1)*.10+Math.max(0,Math.sin(elapsed*.41+2))*.22;
-fe.earR.rotation.z=-.12+Math.sin(elapsed*1.7+1)*.10+Math.max(0,Math.sin(elapsed*.37))*.22;
-fe.earL.rotation.y=Math.sin(elapsed*.53)*.2;fe.earR.rotation.y=Math.sin(elapsed*.47+3)*.2;
-fe.head.rotation.y=Math.sin(elapsed*.19)*Math.sin(elapsed*.31+1)*.9;fe.head.rotation.z=Math.sin(elapsed*.13+2)*.12;
-const blink=(elapsed%4.3)<.13;for(const e of fe.eyes)e.scale.y=blink?.12:1;}
+{const fe=fennec.userData;
+// Night cycle: doze -> alert scan -> dig -> settle. Real fennecs nap in short
+// bouts, snap upright with ears locked at a sound, and dig after buried prey.
+const [fs,fu]=seq(elapsed+3.5,[10,7,5.5,7]);
+const alert=fs===1?ahr(fu,.18,.25):0,dig=fs===2?ahr(fu,.2,.3):0;
+const relaxed=1-alert*.85-dig;
+fennec.position.y=denC.y+.02+Math.sin(elapsed*1.3)*(.008+.005*(1-alert-dig))+alert*.014;
+fennec.rotation.y=Math.sin(elapsed*.23)*.5*relaxed+2.2+dig*.3;
+fennec.rotation.z=dig*Math.sin(fu*Math.PI*4)*.05;
+fe.earL.rotation.z=-.12+alert*.10+Math.sin(elapsed*2.1)*.10*relaxed*.6+Math.max(0,Math.sin(elapsed*.41+2))*.22*relaxed;
+fe.earR.rotation.z=-.12+alert*.10+Math.sin(elapsed*1.7+1)*.10*relaxed*.6+Math.max(0,Math.sin(elapsed*.37))*.22*relaxed;
+fe.earL.rotation.y=Math.sin(elapsed*.53)*.2*relaxed+alert*.15;
+fe.earR.rotation.y=Math.sin(elapsed*.47+3)*.2*relaxed+alert*.15;
+const scan=alert*Math.sin(fu*Math.PI*2)*.6;
+fe.head.rotation.y=Math.sin(elapsed*.19)*Math.sin(elapsed*.31+1)*.9*(1-alert*.5)+scan;
+fe.head.rotation.z=Math.sin(elapsed*.13+2)*.12*(1-alert)-dig*.55*ahr((fu*2.5)%1,.35,.35);
+const blink=(elapsed%4.3)<.13&&!alert;for(const e of fe.eyes)e.scale.y=blink?.12:1;}
 for(let i=0;i<doves.length;i++){const a=elapsed*.22+i*1.26,d=doves[i];
 const r=16+Math.sin(elapsed*.11+i*2)*2.5;
 d.position.set(oasisC.x+Math.sin(a)*r,oasisC.y+11+Math.sin(elapsed*.9+i)*2+Math.sin(elapsed*.23+i*3)*1.5,oasisC.z+Math.cos(a)*r);
@@ -481,20 +508,57 @@ d.userData.wingL.userData.outer.rotation.x=-.25*gate*Math.sin(elapsed*9+i*2-.7);
 d.userData.wingR.userData.outer.rotation.x=.25*gate*Math.sin(elapsed*9+i*2-.7);
 d.position.y+=Math.sin(elapsed*9+i*2)*.05*gate;d.rotation.z=Math.sin(elapsed*.9+i)*.05;}
 for(let i=0;i<perchedDoves.length;i++){const d=perchedDoves[i];
-const peck=(elapsed+i*2.7)%6.5;d.children[0].rotation.z=peck<.9?-.45*Math.sin(peck/.9*Math.PI):0;
-d.rotation.y+=Math.sin(elapsed*.5+i*2)*.0006;}
+// Feeding cycle: amble -> peck burst -> head-up watch -> preen, like a real
+// ground-feeding dove. The merged body pitches and turns as one piece.
+const [ds,du]=seq(elapsed*.8+i*4.1,[5,3.4,4,5]);
+const peck=ds===1&&du<.85?ahr((du*3.2)%1,.4,.4):0;
+const watch=ds===2?ahr(du,.25,.3):0;
+const preen=ds===3?ahr(du,.3,.3):0;
+const amble=ds===0?Math.sin(du*Math.PI*4):0;
+d.children[0].rotation.z=-.42*peck+watch*.14-preen*.2+amble*.04;
+d.children[0].rotation.y=watch*Math.sin(elapsed*.8+i*2)*.4+preen*.95;
+d.rotation.y+=Math.sin(elapsed*.5+i*2)*.0006+amble*.0018;}
 {viper.rotation.y=.8+Math.sin(elapsed*.13)*.1;const vh=viper.userData;
-vh.head.rotation.y=Math.sin(elapsed*.5)*.35;vh.head.rotation.z=Math.sin(elapsed*.23)*.08;
-const tf=elapsed%5.2;vh.tongue.scale.setScalar(tf<.35?1:.01);}
-for(let i=0;i<grouse.length;i++){const g2=grouse[i],pk=(elapsed*.5+i*1.9)%4.8;
-g2.userData.body.rotation.z=pk<.7?-.5*Math.sin(pk/.7*Math.PI):0;
-g2.rotation.y+=Math.sin(elapsed*.4+i*2)*.0008;}
-{const sa2=elapsed*.12,sx3=scarabC.x+Math.sin(sa2)*1.8,sz3=scarabC.z+Math.cos(sa2)*1.8;
-scarab.position.set(sx3,dune(sx3,sz3),sz3);
-scarab.rotation.y=Math.atan2(Math.sin(sa2),Math.cos(sa2));
-scarab.userData.ball.rotation.z+=.12*1.8*dt/.052;}
-{const bob=Math.max(0,Math.sin(elapsed*2.4));agama.position.y=agamaC.y+.09+bob*bob*.028;
-agama.rotation.z=Math.sin(elapsed*1.1)*.03;}
+// Ambush rhythm: long stillness, a slow testing weave with the head raised,
+// then settle. Tongue flickers in irregular bursts of two or three.
+const [vs,vu]=seq(elapsed,[14,6,9]);
+const weave=vs===1?ahr(vu,.3,.3):0;
+vh.head.rotation.y=Math.sin(elapsed*.5)*.10+weave*Math.sin(vu*Math.PI*3)*.55;
+vh.head.rotation.z=Math.sin(elapsed*.23)*.06+weave*.28;
+const tb=elapsed%7.3,tf=tb%1.1;
+vh.tongue.scale.setScalar(tb<3.3&&tf<.35?1:.01);}
+for(let i=0;i<grouse.length;i++){const g2=grouse[i];
+// Dawn watering cycle, true to sandgrouse at a pool: amble in, crouch and dip
+// the bill with raised-head swallows, soak the belly, then freeze and watch.
+const [gs,gu]=seq(elapsed*.7+i*5.3,[6,4.5,3,5.5]);
+const dip=gs===1?ahr(gu,.2,.3):0;
+const swallow=dip*Math.max(0,Math.sin(gu*Math.PI*6))*.1;
+const soak=gs===2?ahr(gu,.3,.3):0;
+const freeze=gs===3?ahr(gu,.15,.2):0;
+const ambleG=gs===0?Math.max(0,Math.sin(gu*Math.PI*6)):0;
+g2.userData.body.rotation.z=-.48*dip+swallow-.16*soak+.1*freeze-.14*ambleG;
+g2.userData.body.position.y=-soak*.035;
+g2.rotation.y+=Math.sin(elapsed*.4+i*2)*.0008*(1-freeze*.8);}
+{// Roll, pause, climb: a real dung beetle stops, mounts its ball to read the
+// sun for a heading, then climbs down and pushes on.
+const [ss2,su2]=seq(elapsed*.6,[8,2,3,8]);
+const rolling=ss2===0||ss2===3,climb=ss2===2?ahr(su2,.35,.35):0;
+const sa2=elapsed*.12,sx3=scarabC.x+Math.sin(sa2)*1.8,sz3=scarabC.z+Math.cos(sa2)*1.8;
+scarab.position.set(sx3,dune(sx3,sz3)+climb*.07,sz3);
+scarab.rotation.y=Math.atan2(Math.sin(sa2),Math.cos(sa2))+climb*.8;
+scarab.rotation.z=-climb*.45;
+if(rolling)scarab.userData.ball.rotation.z+=.12*1.8*dt/.052;}
+{// Territorial display: bursts of rapid push-ups with the head high, then a
+// short dash to a new lookout on the rock and a hard freeze.
+const [as3,au3]=seq(elapsed*.85,[6,4,1.2,6.8]);
+const disp=as3===1?ahr(au3,.12,.15):0;
+const bob=disp?Math.max(0,Math.sin(au3*Math.PI*8)):Math.max(0,Math.sin(elapsed*2.4))*.25;
+const dash=as3===2?smoothU(au3):as3===3?1:0;
+const ddx=Math.sin(dash*.9)*.26,ddz=Math.cos(dash*.9)*.2;
+const rockTop=agamaC.y-.24+.32*Math.sqrt(Math.max(0,1-(ddx/.55)**2-(ddz/.45)**2));
+agama.position.set(agamaC.x+ddx,rockTop+.01+bob*bob*.028,agamaC.z+ddz);
+agama.rotation.y=2.4+dash*.7;
+agama.rotation.z=disp?Math.sin(au3*Math.PI*8)*.05:Math.sin(elapsed*1.1)*.02;}
 const sp=streaks.geometry.attributes.position;for(let i=0;i<sp.count;i++){let x=(streakBase[i]+elapsed*c.wind*9)%140;if(x>70)x-=140;if(x<-70)x+=140;sp.setX(i,x);}sp.needsUpdate=true;streaks.position.set(camera.position.x,0,camera.position.z);streaks.material.opacity=.35*(1-night*.6);
 canvas.dataset.yaw=yaw.toFixed(5);canvas.dataset.pitch=pitch.toFixed(5);canvas.dataset.entryYaw=c.yaw.toFixed(5);canvas.dataset.entryPitch=c.pitch.toFixed(5);document.body.dataset.chapter=chapter;$('#compass').textContent=['N','E','S','W'][Math.floor((((yaw*180/Math.PI)%360+360+45)%360)/90)]+' · '+String(Math.round((yaw*180/Math.PI%360+360)%360)).padStart(3,'0')+'°';renderer.render(scene,camera);if(++frames===2){$('#status').remove();}if(frames===500)$('#orientation').classList.remove('show');}
 changeChapter(0);requestAnimationFrame(animate);
