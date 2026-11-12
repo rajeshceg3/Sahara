@@ -1,7 +1,7 @@
 [
   {
-    "width": 320,
-    "motion": "reduce",
+    "width": 390,
+    "motion": "no-preference",
     "ch": 2,
     "resetHeld": true,
     "audioOff": true,
@@ -10,8 +10,8 @@
     "encounter": true
   },
   {
-    "width": 320,
-    "motion": "reduce",
+    "width": 390,
+    "motion": "no-preference",
     "ch": 3,
     "resetHeld": true,
     "audioOff": true,
