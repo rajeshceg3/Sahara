@@ -72,7 +72,7 @@ header{left:18px;right:18px;top:max(16px,env(safe-area-inset-top));z-index:5}
 @keyframes hint-sway{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(4px)}}
 body:not(.chrome-on) #chrome-hint{display:grid}
 main{bottom:max(18px,env(safe-area-inset-bottom));left:18px;right:18px;z-index:5}
-.story{pointer-events:none;background:var(--paper);border:2.5px solid var(--umber);border-radius:6px 22px 10px 24px/24px 10px 22px 6px;box-shadow:4px 5px 0 var(--umber);padding:13px 18px 14px;max-width:420px;transform:rotate(-.6deg);transition:background .4s,border-color .4s,box-shadow .4s}
+.story{pointer-events:none;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(5px);border:1.5px solid color-mix(in srgb,var(--umber) 72%,transparent);border-radius:6px 22px 10px 24px/24px 10px 22px 6px;box-shadow:0 12px 32px #1c100659,0 2px 7px #1c10063d;padding:13px 18px 14px;max-width:420px;transform:rotate(-.6deg);transition:background .4s,border-color .4s,box-shadow .4s}
 #title{font:33px/1.05 'Instrument Serif',Georgia,serif;letter-spacing:-.5px;margin:0 0 7px;font-weight:400;color:var(--umber);text-shadow:none;transition:color .4s}
 #line{font-size:16px;line-height:1.45;margin:0;color:var(--umber-soft);text-shadow:none;max-width:none;transition:color .4s}
 .crossing{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:13px;pointer-events:none}
