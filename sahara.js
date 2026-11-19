@@ -255,6 +255,35 @@ for(let r2=0;r2<=ROPE_RINGS;r2++){const t=r2/ROPE_RINGS;_rm.lerpVectors(a,b,t);_
 _rt.subVectors(b,a).normalize();_rs.crossVectors(up,_rt).normalize();if(_rs.lengthSq()<.01)_rs.set(1,0,0);_ru.crossVectors(_rt,_rs).normalize();
 for(let s=0;s<ROPE_SIDES;s++){const an=s/ROPE_SIDES*Math.PI*2;pos.setXYZ(r2*ROPE_SIDES+s,_rm.x+(_rs.x*Math.cos(an)+_ru.x*Math.sin(an))*.014,_rm.y+(_rs.y*Math.cos(an)+_ru.y*Math.sin(an))*.014,_rm.z+(_rs.z*Math.cos(an)+_ru.z*Math.sin(an))*.014);}}
 pos.needsUpdate=true;rm.geometry.computeVertexNormals();}
+
+// Mid-field anchors for the two quiet headings (360 rule: every heading carries one focal point).
+// A distant caravan walks the north-west ridge line; a half-buried rock arch stands on the south-west flats.
+// Deterministic placement, zero seed draws; static (no anim-loop registration).
+{const softRock=new T.IcosahedronGeometry(1,1);
+const train=new T.Group();
+const stops=[[-19.3,2.6],[-16.6,.6],[-13.8,-1.5],[-11,-3.7],[-8.2,-5.8]];const silMat=new T.MeshBasicMaterial({color:'#7c5740'});
+for(const [tx,tz] of stops){const c=makeCamel(blankets[0]);c.traverse(o=>{if(o.isMesh)o.material=silMat;});c.scale.multiplyScalar(.45);
+c.position.set(tx,meshHeight(tx,tz),tz);c.rotation.y=3.80;train.add(c);}
+scene.add(train);
+
+const archMat=mat('#8a6a4c',.95);
+const arch=new T.Mesh(new T.TorusGeometry(4.2,1.15,7,14,Math.PI*.8),archMat);
+arch.position.set(-26.7,dune(-26.7,28.5)+.3,28.5);arch.rotation.z=Math.PI*.1;arch.castShadow=true;scene.add(arch);
+stamp('rock',rockGeo,'#6e5238',v(-30.0,dune(-30.0,26.4)-.2,26.4),v(1.8,1.0,1.5),new T.Quaternion().setFromEuler(new T.Euler(.4,1.1,.2)));
+stamp('rock',rockGeo,'#8a6a4c',v(-23.6,dune(-23.6,30.9)-.3,30.9),v(1.3,.8,1.1),new T.Quaternion().setFromEuler(new T.Euler(1.2,.5,.9)));
+stamp('rockSoft',softRock,'#6e5238',v(-8.3,dune(-8.3,3.6)-.3,3.6),v(.46,.25,.4),new T.Quaternion().setFromEuler(new T.Euler(.7,2.1,.3)));
+stamp('shrubSoft',softRock,'#6a5a34',v(-6.7,dune(-6.7,5.2)+.08,5.2),v(.58,.26,.52),new T.Quaternion().setFromEuler(new T.Euler(.06,.8,-.05)));
+stamp('rockSoft',softRock,'#6e5238',v(-8.8,dune(-8.8,14.5)-.25,14.5),v(.48,.28,.42),new T.Quaternion().setFromEuler(new T.Euler(2.4,1.2,.8)));
+stamp('shrubSoft',softRock,'#6a5a34',v(-6.6,dune(-6.6,14.6)+.07,14.6),v(.6,.27,.55),new T.Quaternion().setFromEuler(new T.Euler(-.04,2.2,.07)));
+// Lee-side wind-ripple shadow bands: thin soft strips hugging the sand, one per quiet heading.
+const bandCv=document.createElement('canvas');bandCv.width=64;bandCv.height=16;const bx=bandCv.getContext('2d');
+bx.fillStyle='#000';bx.fillRect(0,0,64,16);
+const lg=bx.createLinearGradient(0,0,64,0);lg.addColorStop(0,'rgba(255,255,255,0)');lg.addColorStop(.3,'rgba(255,255,255,1)');lg.addColorStop(.7,'rgba(255,255,255,1)');lg.addColorStop(1,'rgba(255,255,255,0)');bx.fillStyle=lg;bx.fillRect(0,0,64,16);
+const vg=bx.createLinearGradient(0,0,0,16);vg.addColorStop(0,'rgba(0,0,0,1)');vg.addColorStop(.35,'rgba(0,0,0,0)');vg.addColorStop(.65,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,1)');bx.fillStyle=vg;bx.fillRect(0,0,64,16);
+const ripMat=new T.MeshBasicMaterial({color:'#3a240c',transparent:true,opacity:.12,depthWrite:false,alphaMap:new T.CanvasTexture(bandCv)});
+for(const [rx,rz,rw,rl,ra] of [[-7.5,4.5,5.5,.85,.5],[-9,2.5,5,.8,.55],[-8.2,14.8,5.5,.85,-.4],[-9.6,15.6,5,.75,-.35]]){
+const rip=new T.Mesh(new T.PlaneGeometry(rw,rl),ripMat);
+rip.rotation.x=-Math.PI/2;rip.rotation.z=ra;rip.position.set(rx,dune(rx,rz)+.04,rz);scene.add(rip);}}
 // The sandfish: a banded, glossy skink that swims beneath the loose sand.
 const skink=new T.Group();
 const skinkBody=paint(taperTube([v(.58,.01,0),v(.34,.03,.025),v(0,.045,-.02),v(-.30,.02,.02),v(-.52,0,0),v(-.68,-.01,0)],t=>.004+.095*Math.pow(Math.sin(Math.PI*Math.min(1,.06+t*1.02)),.8),10),(q,c)=>{
